@@ -21,6 +21,7 @@ var Wall = function () {
 Wall.prototype = {
   tiles: [],
   deadCount: Constants.DEADWALL,
+  // is this wall dead? (i.e. no more tiles available for drawing)
   isDead: function() { return this.tiles.size <= this.deadCount; },
   // draw a tile, unless we're in the dead wall
   draw: function() {
