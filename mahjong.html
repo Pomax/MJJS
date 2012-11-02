@@ -1,0 +1,134 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Mahjong implementation</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script src="triggers.js"></script>
+
+    <script>
+      window.on("tile-mouseover", function(evt) {
+        // console.log("mouseover", evt);
+        var tile = evt.tile;
+        if(!tile.concealed) {
+          tile.setAttribute("title", Constants.tileNames[tile.tileNumber]);
+        }
+      });
+
+      window.on("tile-mouseout", function(evt) {
+        // console.log("mouseout", evt);
+      });
+
+      window.on("tile-click", function(evt) {
+        // console.log("click", evt);
+        evt.tile.reveal();
+      });
+    </script>
+
+    <script src="constants.js"></script>
+    <script src="tile.js"></script>
+    <script src="wall.js"></script>
+    <script src="strategies.js"></script>
+    <script src="sets.js"></script>
+    <script src="runs.js"></script>
+    <script src="declared.js"></script>
+    <script src="bank.js"></script>
+    <script src="hand.js"></script>
+    <script src="player.js"></script>
+  </head>
+
+  <body>   
+    <h2>The wall</h2>
+    <div id="wall"></div>
+
+    <h2>The discards</h2>
+    <div id="discards"></div>
+    
+    <h2>The players</h2>
+    <div id="players"></div>
+    
+    <p>&nbsp;</p>
+    
+    <script>
+      var wall = new Wall();
+      var players = [];
+
+      (function(){
+        document.getElementById("wall").appendChild(wall.asHTMLElement());
+        var discards = document.getElementById("discards");
+        var playerNames = ["Pomax", "Defense Cat", "Yellow Dragon", "Tonbot5000"], pos;
+        playerNames.forEach(function(playerName) {
+          pos = players.length;
+          players.push(new Player(playerName));
+          document.getElementById("players").appendChild(players[pos].asHTMLElement());
+        });
+
+        // draw tiles for each player
+        for(var i=0; i < Constants.HANDSIZE - 1; i++) {
+          players[0].draw(wall);
+          players[1].draw(wall);
+          players[2].draw(wall);
+          players[3].draw(wall);
+        }
+        
+        // show what each player has in their hand
+        for(var i=0; i<4; i++) {
+          players[i].reveal(); 
+          players[i].sort();
+          players[i].determineStrategy();
+        }
+        
+        wall.reveal();
+        gameLoop = (function(players, wall, discardsDiv) {
+          var idx = 3, i=0, tile;
+          return function() {
+            players[idx].unhighlight();
+            idx = (idx+1)%4;
+
+            var player = players[idx];
+            player.highlight();
+            tile = player.draw(wall);
+            console.log(player.name + " drew [" + Tiles.getTileName(tile)+ "] from the wall");
+            player.determineStrategy();
+            tile = player.discard();
+            player.sort();
+            console.log(player.name + " discards [" + Tiles.getTileName(tile) + "]");
+            
+            // does anyone want this?
+            var bestBid = -1, bid, bidx, bestBidder, bidder;
+            while (bestBid != 0) {
+              bestBid = 0;
+              bestBidder = -1;
+              for(i=1; i<4; i++) {
+                bidx = (idx+i)%4;
+                bidder = players[bidx];
+                bid = bidder.lookingFor(tile);
+                if(bid > bestBid) {
+                  if(i>1 && bid<Constants.PUNG) continue;
+                  console.log(bidder.name + " wants this tile (bid="+bid+").");
+                  bestBid = bid;
+                  bestBidder = bidx; }}
+
+              // hand it over, if there's a valid bid
+              if (bestBid > 0) {
+                player.unhighlight();
+                idx = bestBidder;
+                player = players[idx];
+                player.highlight();
+                player.claim(tile, bestBid);
+                player.determineStrategy();
+                var newTile = player.discard();
+                player.sort();
+                console.log(player.name + " discards [" + Tiles.getTileName(newTile) + "] after claiming [" + Tiles.getTileName(tile) + "]");
+                tile = newTile;
+              }
+            }
+            console.log("no one wants it.");
+            discardsDiv.appendChild(tile);
+          }
+        }(players, wall, discards));
+
+      }());
+    </script>
+  </body>
+</html>

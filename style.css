@@ -1,0 +1,45 @@
+/* force fit-content */
+html, body, div { margin: 0; padding: 0; line-height: 0; }
+p { line-height: 1em; }
+
+.tile:hover { border: 2px solid black; margin: 0px; }
+.tile       { border: 1px solid black; margin: 1px; }
+
+#wall {
+  line-height: 10px;
+}
+
+#players {
+  border: 1px solid black;
+}
+
+#players .player:before {
+  content: attr(data-name);
+  line-height: 1em;
+}
+
+#players .player {
+  border: 1px solid transparent;
+}
+
+#players .player.highlight {
+  background-color: orange;
+}
+
+#players .player .hand .bank {
+  display: inline-block;
+}
+#players .player .hand .bank.open div {
+  display: inline-block;
+}
+
+
+
+#players .player .hand .bank.open .tile {
+  border: none;
+  margin: 2px;
+}
+
+#players .player .concealed.bank { background-color: rgb(200,255,200); }
+#players .player .open.bank     { background-color: rgb(255,200,200); }
+#players .player .bonus.bank    { background-color: rgb(200,200,255); }
