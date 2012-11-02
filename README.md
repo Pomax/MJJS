@@ -1,7 +1,7 @@
 Writing a Mahjong A.I.
 ----------------------
 
-The game of Mahjong is a four-player game of chance-based tactics. 
+The game of Mahjong is a four-player game of chance-based tactics.
 
 There are 144 tiles, distributed as:
 
@@ -38,7 +38,7 @@ or her own "wind". The first player to start the game is player "east".
 After every "hand" is played, the winds rotate so that either:
 
   i) the player representing "east" becomes "south", "south" becomes "west", etc.
-  
+
 or
 
   ii) the player representing "east" becomes "north", "south" becomes "east", etc.
@@ -49,27 +49,27 @@ When the player who started as "east" becomes "east" again, the "wind of the
 round" is changed. The happens four times, giving the following minimal play
 table:
 
-      P1  P2  P3  P4  round
-      --  --  --  --  -----
-   1   E   S   W   N   E
-   2   S   W   N   E   E
-   3   W   N   E   S   E
-   4   N   E   S   W   E
-   
-   5   E   S   W   N   S
-   6   S   W   N   E   S
-   7   W   N   E   S   S
-   8   N   E   S   W   S
+        P1  P2  P3  P4  round
+        --  --  --  --  -----
+     1   E   S   W   N   E
+     2   S   W   N   E   E
+     3   W   N   E   S   E
+     4   N   E   S   W   E
 
-   9   E   S   W   N   W
-  10   S   W   N   E   W
-  11   W   N   E   S   W
-  12   N   E   S   W   W
+     5   E   S   W   N   S
+     6   S   W   N   E   S
+     7   W   N   E   S   S
+     8   N   E   S   W   S
 
-  13   E   S   W   N   N
-  14   S   W   N   E   N
-  15   W   N   E   S   N
-  16   N   E   S   W   N
+     9   E   S   W   N   W
+    10   S   W   N   E   W
+    11   W   N   E   S   W
+    12   N   E   S   W   W
+
+    13   E   S   W   N   N
+    14   S   W   N   E   N
+    15   W   N   E   S   N
+    16   N   E   S   W   N
 
 Typically, there are additional rules which may lead to hands being "repeated"
 either when the player who represents "east" wins, or when a hand is drawn.

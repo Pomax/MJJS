@@ -37,18 +37,20 @@
     <script src="player.js"></script>
   </head>
 
-  <body>   
+  <body>
+    <p style="text-align:right"><a href="https://github.com/Pomax/MJJS/tree/gh-pages">This is a work in progress, code on github.com</a></p>
+
     <h2>The wall</h2>
     <div id="wall"></div>
 
     <h2>The discards</h2>
     <div id="discards"></div>
-    
+
     <h2>The players</h2>
     <div id="players"></div>
-    
+
     <p>&nbsp;</p>
-    
+
     <script>
       var wall = new Wall();
       var players = [];
@@ -70,16 +72,18 @@
           players[2].draw(wall);
           players[3].draw(wall);
         }
-        
+
         // show what each player has in their hand
         for(var i=0; i<4; i++) {
-          players[i].reveal(); 
+          players[i].reveal();
           players[i].sort();
           players[i].determineStrategy();
         }
-        
-        wall.reveal();
+
+        //wall.reveal();
+
         gameLoop = (function(players, wall, discardsDiv) {
+
           var idx = 3, i=0, tile;
           return function() {
             players[idx].unhighlight();
@@ -88,12 +92,13 @@
             var player = players[idx];
             player.highlight();
             tile = player.draw(wall);
+            tile.reveal();
             console.log(player.name + " drew [" + Tiles.getTileName(tile)+ "] from the wall");
             player.determineStrategy();
             tile = player.discard();
             player.sort();
             console.log(player.name + " discards [" + Tiles.getTileName(tile) + "]");
-            
+
             // does anyone want this?
             var bestBid = -1, bid, bidx, bestBidder, bidder;
             while (bestBid != 0) {
@@ -128,6 +133,13 @@
           }
         }(players, wall, discards));
 
+        // call this!
+        autoplay = function() {
+          if(!wall.isDead()) {
+            gameLoop();
+            setTimeout(autoplay, 250);
+          }
+        }
       }());
     </script>
   </body>
