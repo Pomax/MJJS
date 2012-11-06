@@ -28,6 +28,8 @@
     <script src="constants.js"></script>
     <script src="tile.js"></script>
     <script src="wall.js"></script>
+    <script src="generator.js"></script>
+    <script src="statistics.js"></script>
     <script src="strategies.js"></script>
     <script src="sets.js"></script>
     <script src="runs.js"></script>
@@ -35,112 +37,164 @@
     <script src="bank.js"></script>
     <script src="hand.js"></script>
     <script src="player.js"></script>
+
+    <script src="utilities.js"></script>
   </head>
 
   <body>
-    <p style="text-align:right"><a href="https://github.com/Pomax/MJJS/tree/gh-pages">This is a work in progress, code on github.com</a></p>
+    <table><tr><td>
+      <button onclick="setupGame()">Reset the game</button>
+      <button onclick="autoplay()">Play game</button>
+      <button onclick="interrupt = true">Interrupt</button>
+    </td></tr><table>
 
-    <h2>The wall</h2>
-    <div id="wall"></div>
-
-    <h2>The discards</h2>
-    <div id="discards"></div>
+    <table>
+      <tr><td style="width: 50%; vertical-align: top;">
+        <h2>The wall</h2>
+        <div id="wall"></div>
+      </td><td style="width: 50%; vertical-align: top;">
+        <h2>The discards</h2>
+        <div id="discards"></div>
+      </td></tr>
+    </table>
 
     <h2>The players</h2>
     <div id="players"></div>
 
-    <p>&nbsp;</p>
+    <p style="text-align:right"><a href="https://github.com/Pomax/MJJS/tree/gh-pages">This is a work in progress, code on github.com</a></p>
 
     <script>
-      var wall = new Wall();
-      var players = [];
+      var setupGame = function setupGame() {
+        // clear "board"
+        document.getElementById("wall").innerHTML = "";
+        document.getElementById("discards").innerHTML = "";
+        document.getElementById("players").innerHTML = "";
 
-      (function(){
-        document.getElementById("wall").appendChild(wall.asHTMLElement());
-        var discards = document.getElementById("discards");
-        var playerNames = ["Pomax", "Defense Cat", "Yellow Dragon", "Tonbot5000"], pos;
-        playerNames.forEach(function(playerName) {
-          pos = players.length;
-          players.push(new Player(playerName));
-          document.getElementById("players").appendChild(players[pos].asHTMLElement());
-        });
+        // set up "board"
+        var wall = new Wall();
+        var players = [];
 
-        // draw tiles for each player
-        for(var i=0; i < Constants.HANDSIZE - 1; i++) {
-          players[0].draw(wall);
-          players[1].draw(wall);
-          players[2].draw(wall);
-          players[3].draw(wall);
-        }
+        // set up the game run function
+        (function runGame() {
+          document.getElementById("wall").appendChild(wall.asHTMLElement());
+          var discards = document.getElementById("discards");
+          var playerNames = ["Pomax", "Defense Cat", "Yellow Dragon", "Tonbot5000"], pos;
 
-        // show what each player has in their hand
-        for(var i=0; i<4; i++) {
-          players[i].reveal();
-          players[i].sort();
-          players[i].determineStrategy();
-        }
+          (function setupHand(playerNames) {
+            playerNames.forEach(function(playerName) {
+              pos = players.length;
+              players.push(new Player(playerName));
+              document.getElementById("players").appendChild(players[pos].asHTMLElement());
+            });
 
-        //wall.reveal();
-
-        gameLoop = (function(players, wall, discardsDiv) {
-
-          var idx = 3, i=0, tile;
-          return function() {
-            players[idx].unhighlight();
-            idx = (idx+1)%4;
-
-            var player = players[idx];
-            player.highlight();
-            tile = player.draw(wall);
-            tile.reveal();
-            console.log(player.name + " drew [" + Tiles.getTileName(tile)+ "] from the wall");
-            player.determineStrategy();
-            tile = player.discard();
-            player.sort();
-            console.log(player.name + " discards [" + Tiles.getTileName(tile) + "]");
-
-            // does anyone want this?
-            var bestBid = -1, bid, bidx, bestBidder, bidder;
-            while (bestBid != 0) {
-              bestBid = 0;
-              bestBidder = -1;
-              for(i=1; i<4; i++) {
-                bidx = (idx+i)%4;
-                bidder = players[bidx];
-                bid = bidder.lookingFor(tile);
-                if(bid > bestBid) {
-                  if(i>1 && bid<Constants.PUNG) continue;
-                  console.log(bidder.name + " wants this tile (bid="+bid+").");
-                  bestBid = bid;
-                  bestBidder = bidx; }}
-
-              // hand it over, if there's a valid bid
-              if (bestBid > 0) {
-                player.unhighlight();
-                idx = bestBidder;
-                player = players[idx];
-                player.highlight();
-                player.claim(tile, bestBid);
-                player.determineStrategy();
-                var newTile = player.discard();
-                player.sort();
-                console.log(player.name + " discards [" + Tiles.getTileName(newTile) + "] after claiming [" + Tiles.getTileName(tile) + "]");
-                tile = newTile;
-              }
+            // draw tiles for each player
+            for(var i=0; i < Constants.HANDSIZE - 1; i++) {
+              players[0].draw(wall);
+              players[1].draw(wall);
+              players[2].draw(wall);
+              players[3].draw(wall);
             }
-            console.log("no one wants it.");
-            discardsDiv.appendChild(tile);
-          }
-        }(players, wall, discards));
+
+            // show what each player has in their hand
+            for(var i=0; i<4; i++) {
+              players[i].reveal();
+              players[i].sort();
+            }
+          }(playerNames));
+
+          // set up the game loop function
+          window.gameLoop = (function(players, wall, discardsDiv) {
+            var idx = 3, i=0, tile;
+
+            // closure wrapped
+            return function() {
+              players[idx].unhighlight();
+              idx = (idx+1)%4;
+
+              var player = players[idx];
+              player.highlight();
+              tile = player.draw(wall);
+
+              if(tile===Constants.NOTILE) {
+                console.log("Game was drawn.");
+                return false;
+              }
+
+              tile.reveal();
+              console.log(player.name + " drew [" + Tiles.getTileName(tile)+ "] from the wall");
+              tile = player.discard();
+              console.log(player.name + " discards "+tile.tileNumber+" [" + Tiles.getTileName(tile) + "]");
+              player.sort();
+
+              // does anyone want this?
+              (function checkClaim() {
+                var bestBid = -1, bid, bidx, bestBidder, bidder;
+                while (bestBid != 0) {
+                  bestBid = 0;
+                  bestBidder = -1;
+                  for(i=1; i<4; i++) {
+                    bidx = (idx+i)%4;
+                    bidder = players[bidx];
+                    bid = bidder.lookingFor(tile);
+                    // better than current bid?
+                    if(bid > bestBid) {
+                      if(i>1 && bid<Constants.PUNG) continue;
+                      console.log(bidder.name + " wants this tile (bid: "+bid+", to form a "+Constants.setNames[Tiles.getClaimType(bid)]+").");
+                      console.log(bidder.name + " currently holds " + bidder.hand.concealed.toTileNumbers()+", requires " + bidder.hand.strategy.required);
+                      bestBid = bid;
+                      bestBidder = bidx;
+                    }
+                  }
+
+                  // if there is a valid bid, honour the claim
+                  if (bestBid > 0) {
+                    console.log("claim bid accepted.");
+                    player.unhighlight();
+                    idx = bestBidder;
+                    player = players[idx];
+                    player.highlight();
+                    player.claim(tile, bestBid);
+
+                    // if this was for a kong, the player gets a supplement tile
+                    if(bestBid === Constants.PUNG) {
+                      console.log(player.name+" played a kong. Issuing supplement tile.");
+                      player.draw(wall, true);
+                    }
+                    var newTile = player.discard();
+                    if(newTile === Constants.WIN) {
+                      throw "winner!";
+                    }
+                    player.sort();
+                    console.log(player.name + " discards [" + Tiles.getTileName(newTile) + "] after claiming [" + Tiles.getTileName(tile) + "]");
+                    tile = newTile;
+                  }
+                }
+
+                console.log("no one wants it.");
+                discardsDiv.appendChild(tile);
+              }());
+
+              // successful tile
+              return true;
+            }
+          }(players, wall, discards));
+        }());  // end of runGame()
+
+        window.interrupt = false;
 
         // call this!
-        autoplay = function() {
+        window.autoplay = function() {
+          if(interrupt) return;
           if(!wall.isDead()) {
-            gameLoop();
-            setTimeout(autoplay, 250);
+            if (!gameLoop()) {
+              setupGame();
+            }
+            setTimeout(autoplay, 5);
           }
         }
-      }());
+      };  // end of setupGame
+
+      setupGame();
     </script>
   </body>
 </html>

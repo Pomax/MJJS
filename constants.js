@@ -1,5 +1,5 @@
 /**
- * Mahjong constants
+ * Mahjong constants. This includes the tile sorting function for use in JavaScript's array.sort(fn)
  */
 var Constants = {
   // very special values
@@ -24,7 +24,7 @@ var Constants = {
   // numerals: 0-26 (simples: 1..7 % 9, terminals: 0 % 9 and 8 % 9)
   NUMERALS:     0,
   NUMMOD:       9,
-  
+
   // bamboo suit: 0-8
   BAMBOOS:      0,
   BAMBOO_ONE:   0,
@@ -36,8 +36,8 @@ var Constants = {
   BAMBOO_SEVEN: 6,
   BAMBOO_EIGHT: 7,
   BAMBOO_NINE:  8,
-  
-  // character suit: 9-17  
+
+  // character suit: 9-17
   CHARACTERS:       9,
   CHARACTER_ONE:    9,
   CHARACTER_TWO:   10,
@@ -56,7 +56,7 @@ var Constants = {
   DOT_THREE: 20,
   DOT_FOUR:  21,
   DOT_FIVE:  22,
-  DOT_SIX:   23,  
+  DOT_SIX:   23,
   DOT_SEVEN: 24,
   DOT_EIGHT: 25,
   DOT_NINE:  26,
@@ -71,7 +71,7 @@ var Constants = {
   WEST:  29,
   NORTH: 30,
 
-  // dragons: 31-33  
+  // dragons: 31-33
   DRAGONS: 31,
   GREEN:   31,
   RED:     32,
@@ -84,7 +84,7 @@ var Constants = {
   ORCHID:        35,
   CHRYSANTHEMUM: 36,
   BAMBOO:        37,
-  
+
   // bonus tiles: seasons: 38-41
   SEASONS: 38,
   SPRING:  38,
@@ -95,13 +95,13 @@ var Constants = {
   // there are 34 playtiles and eight bonus tiles
   PLAYTILES: 34,
   BONUSTILES: 8,
-  
+
   // how many tiles in the dead wall?
   DEADWALL: 16,
 
   // universal numerical sorting function
   sortFunction: function(a,b) {
-    return (a===b ? 0 : a < b ? -1 : 1); 
+    return (a===b ? 0 : a < b ? -1 : 1);
   },
 };
 
@@ -146,7 +146,7 @@ var Constants = {
     tileNames[Constants.DOT_EIGHT] = "dots eight";
     tileNames[Constants.DOT_NINE]  = "dots nine";
     return true;
-  }());    
+  }());
 
   setWindNames: (function(){
     tileNames[Constants.EAST]  = "east";
@@ -178,6 +178,24 @@ var Constants = {
     tileNames[Constants.WINTER] = "north season: winter";
     return true;
   }());
-  
   Constants.tileNames = tileNames;
+
+  var setNames = [];
+  setSetNames: (function(){
+    setNames[Constants.NOTHING] = "nothing";
+    setNames[Constants.SINGLE] = "single";
+    setNames[Constants.CONNECTED] = "connected pair";
+    setNames[Constants.PAIR] = "pair";
+    setNames[Constants.GAPPED] = "gapped chow";
+    setNames[Constants.CHOW] = "chow";
+    setNames[Constants.PUNG] = "pung";
+    setNames[Constants.KONG] = "kong";
+    setNames[Constants.CONCEALED_KONG] = "concealed kong";
+    setNames[Constants.SET] = "set";
+    setNames[Constants.REQUIRED] = "requirement";
+    setNames[Constants.WIN] = "winning hand";
+    return true;
+  }());
+  Constants.setNames = setNames;
+
 }(Constants));

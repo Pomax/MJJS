@@ -1,3 +1,8 @@
+/**
+ * This object represents a run of tiles. While any size is possible,
+ * the game itself is only really concerned with sets of three consecutive
+ * numbered tiles from the same suit.
+ */
 var Run = function(hand, tileNumber, setSize) {
   var Run = this;
   this.tiles = [];
@@ -5,7 +10,7 @@ var Run = function(hand, tileNumber, setSize) {
   var count = 0;
   var bank = hand.concealed;
   var tile, i;
-  
+
   tileNumber += setSize-1;
 
   // can we do this?
@@ -32,8 +37,14 @@ var Run = function(hand, tileNumber, setSize) {
 
 Run.prototype = {
   tiles: [],
+  get: function(idx) {
+    return this.tiles[idx];
+  },
   add: function(tile) {
     this.tiles.push(tile);
+  },
+  reveal: function() {
+    this.tiles.forEach(function(t){ t.reveal(); });
   },
   // convert to array of tileNumbers
   toTileNumbers: function() {
@@ -60,10 +71,14 @@ Run.prototype = {
 
 Run.prototype.constructor = Run;
 
-// pair, pung, kong
+// The possible runs in a game of MJ: 2 tiles is a connected pair.
+// It's an incomplete pattern that lets us determine that there is
+// the potential for getting a chow.
 var ConnectedPair = function(hand, tileNumber) {
   return new Run(hand, tileNumber, 2);
 };
+
+// The possible runs in a game of MJ: 3 tiles form a chow.
 var Chow = function(hand, tileNumber) {
   return new Run(hand, tileNumber, 3);
 };

@@ -3,6 +3,8 @@
  */
 
 var Wall = function () {
+  this.tiles = [];
+
   // create sorted array
   var tiles = [], i;
   for(i=0; i<Constants.PLAYTILES; i++) {

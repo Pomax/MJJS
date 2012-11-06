@@ -1,6 +1,8 @@
 /**
- * Similar to Bank, but for Set/Run objects rather than tiles
- * NOTE: we cannot remove declared tiles, and they are always revealed
+ * This object is similar to a Bank, but rather than containing tiles,
+ * contains Set/Run objects.
+ *
+ * NOTE: we cannot remove declared sets, and they are always open
  */
 
 var Declared = function(type) {
@@ -9,8 +11,9 @@ var Declared = function(type) {
 
 Declared.prototype = {
   // add a tile to this hand
-  add: function(set) { 
-    this.sets.push(set); 
+  add: function(set) {
+    set.reveal();
+    this.sets.push(set);
     if(this.el) { this.el.appendChild(set.asHTMLElement()); }
   },
   // convert to array of tileNumbers
@@ -20,6 +23,18 @@ Declared.prototype = {
       numbers = numbers.concat([set.toTileNumbers()]);
     });
     return numbers;
+  },
+  // sort this bank
+  sort: function() {
+    this.sets.sort(function(a,b) {
+      a = a.get(0).tileNumber;
+      b = b.get(0).tileNumber;
+      return Constants.sortFunction(a,b);
+    });
+    this.asHTMLElement(true);
+  },
+  size: function() {
+    return this.sets.length;
   },
   asHTMLElement: function(update) {
     if(!this.el) {

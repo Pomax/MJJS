@@ -24,10 +24,10 @@ var Tiles = {
     tile.getTileNumber = function() { return tileNumber; };
     // load the image!
     tile.src = (concealed? tile.back : tile.face);
-    
+
     var fns = ["isNumeral", "isTerminal", "isHonour", "isWind", "isDragon", "isBonus"];
     fns.forEach(function(fn) { tile[fn] = function() { return Tiles[fn](tile); }; });
-    
+
     return tile;
   },
   // is... functions
@@ -91,30 +91,39 @@ var Tiles = {
   getTileType: function(tileNumber, tileList) {
     // part of a pair?
     if(tileList.indexOf(tileNumber) !== -1) {
+      // we know we can use it for a pair, but can we use it for a pung?
       tileList.splice(tileList.indexOf(tileNumber), 1);
       if(tileList.indexOf(tileNumber) !== -1) {
+        // we know we can use it for a pung, but can we use it for a kong?
         tileList.splice(tileList.indexOf(tileNumber), 1);
         if(tileList.indexOf(tileNumber) !== -1) {
           return Constants.KONG;
-         }
+        }
+        // we can't use it for a kong, so: pung it is.
         return Constants.PUNG;
       }
+      // we can't use it for a pung, so: pair it is.
       return Constants.PAIR;
     }
+
+    // We can't chow honours. This might "break" for rule sets, but for now we don't care about those.
+    if (tileNumber >= Constants.HONOURS) { Constants.SINGLE; }
+
+    // if we get here, we might be able to form a chow from a connected pair or gapped chow
+    var bestType = Constants.SINGLE;
 
     // part of a connected pair or gapped chow?
     var prev2 = tileNumber-2;
     var prev1 = tileNumber-1;
     var next1 = tileNumber+1;
     var next2 = tileNumber+2;
-    
-    var p2 = (tileList.indexOf(prev2) !== -1);
-    var p1 = (tileList.indexOf(prev1) !== -1);
-    var n1 = (tileList.indexOf(next1) !== -1);
-    var n2 = (tileList.indexOf(next2) !== -1);
-    
-    var bestType = Constants.SINGLE;
-    
+
+    var suit = this.getTileSuit(tileNumber);
+    var p2 = (this.getTileSuit(prev2) === suit && tileList.indexOf(prev2) !== -1);
+    var p1 = (this.getTileSuit(prev1) === suit && tileList.indexOf(prev1) !== -1);
+    var n1 = (this.getTileSuit(next1) === suit && tileList.indexOf(next1) !== -1);
+    var n2 = (this.getTileSuit(next2) === suit && tileList.indexOf(next2) !== -1);
+
     // this tile at the end?
     if((p1||p2) && this.isLegalChow(prev2, prev1, tileNumber)) {
       //console.log("prev", prev2, p2, prev1, p1, "[", tileNumber, "]", true);
@@ -140,5 +149,39 @@ var Tiles = {
 
     // definitely singleton
     return bestType;
+  },
+  // FIXME: this function is broken - it does not take into account
+  //        that values can change when certain tiles are treated
+  //        as locked. This function should move tiles from
+  //        concealed to locked, instead, and re-evaluate the tile
+  //        values based on this more rigid hand.
+  isWinningPattern: function(concealed, values, open) {
+    var setCount = 4 - open.size();
+    var pairCount = 1;
+    var i, v;
+    for(i=0; i<concealed.length; i++) {
+      v = values[i];
+      if(v === Constants.CONNECTED || v === Constants.GAPPED) {
+        return false;
+      }
+      if(v === Constants.PUNG || v === Constants.CHOW) {
+        if(values[i+1]!==v ||values[i+2]!==v) { return false; }
+        setCount--;
+        if(setCount<0) { return false; }
+        i+=2;
+      }
+      if(v === Constants.PAIR) {
+        if(values[i+1]!==v) { return false; }
+        pairCount--;
+        if(pairCount<0) { return false; }
+        i+=1;
+      }
+    }
+    console.log("win result: "+setCount+"/"+pairCount);
+
+    if(setCount===0 && pairCount===0) {
+      console.log("win result: "+setCount+"/"+pairCount);
+    }
+    return (setCount+pairCount===0);
   }
 };

@@ -1,15 +1,21 @@
+/**
+ * A bank represents a collection of tiles that are associated
+ * with a player's hand. The usually "banks" are the concealed
+ * tile set, the open/revealed tile set, and the bonus tiles.
+ */
+
 var Bank = function(type) {
   this.tiles = [];
   this.type = type;
 }
 
 Bank.prototype = {
-  // add a tile to this hand
-  add: function(tile) { 
-    this.tiles.push(tile); 
+  // add a tile to this bank
+  add: function(tile) {
+    this.tiles.push(tile);
     if(this.el) { this.el.appendChild(tile); }
   },
-  // do we have this tile?
+  // does this tile exist in this bank?
   contains: function(tile) {
     var tileNumber = tile.tileNumber;
     var i=this.tiles.length;
@@ -38,7 +44,7 @@ Bank.prototype = {
     console.log("could not find "+tileNumber+" in "+this.toTileNumbers().join(","));
     return null;
   },
-  // remove a tile from this hand
+  // remove a tile from this bank
   remove: function(tile) {
     var tiles = this.tiles, last = tiles.length, t;
     for(t=0; t<last; t++) {
@@ -49,7 +55,7 @@ Bank.prototype = {
       }
     }
   },
-  // reveal this bank
+  // reveal all tiles in this bank
   reveal: function() {
     (this.tiles).forEach(function(tile) { tile.reveal(); });
   },
@@ -62,7 +68,7 @@ Bank.prototype = {
     });
     this.asHTMLElement(true);
   },
-  // convert to array of tileNumbers
+  // convert the tile set to an array of tile numbers
   toTileNumbers: function() {
     var numbers = [];
     this.tiles.forEach(function(tile) {
