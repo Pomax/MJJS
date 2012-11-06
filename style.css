@@ -33,8 +33,6 @@ p { line-height: 1em; }
   display: inline-block;
 }
 
-
-
 #players .player .hand .bank.open .tile {
   border: none;
   margin: 2px;
@@ -43,3 +41,10 @@ p { line-height: 1em; }
 #players .player .concealed.bank { background-color: rgb(200,255,200); }
 #players .player .open.bank     { background-color: rgb(255,200,200); }
 #players .player .bonus.bank    { background-color: rgb(200,200,255); }
+
+#players .run { margin: 0 0.5em; }
+#players .set { margin: 0 0.5em; }
+#players .run + .set { margin-left: 0em; }
+#players .run + .run { margin-left: 0em; }
+#players .set + .run { margin-left: 0em; }
+#players .set + .set { margin-left: 0em; }
