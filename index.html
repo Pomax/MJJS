@@ -38,6 +38,7 @@
     <script src="hand.js"></script>
     <script src="player.js"></script>
 
+    <script src="turnhistory.js"></script>
     <script src="utilities.js"></script>
   </head>
 
@@ -105,6 +106,7 @@
           // set up the game loop function
           window.gameLoop = (function(players, wall, discardsDiv) {
             var idx = 3, i=0, tile;
+            turnHistory = newHistory();
 
             // closure wrapped
             return function() {
@@ -113,18 +115,25 @@
 
               var player = players[idx];
               player.highlight();
-              tile = player.draw(wall);
+              var drawnTile = player.draw(wall);
 
-              if(tile===Constants.NOTILE) {
+              if (drawnTile === Constants.NOTILE) {
                 console.log("Game was drawn.");
-                return false;
+                return Constants.DRAWN;
               }
 
-              tile.reveal();
-              console.log(player.name + " drew [" + Tiles.getTileName(tile)+ "] from the wall");
-              tile = player.discard();
-              console.log(player.name + " discards "+tile.tileNumber+" [" + Tiles.getTileName(tile) + "]");
+              drawnTile.reveal();
+              console.log(player.name + " drew [" + Tiles.getTileName(drawnTile)+ "] from the wall");
+              var discardTile = player.discard();
+              console.log(player.name + " discards "+discardTile.tileNumber+" [" + Tiles.getTileName(discardTile) + "]");
               player.sort();
+
+              if(discardTile === Constants.WIN || discardTile === Constants.NOTHING) {
+                turnHistory.addStep(player, drawnTile, Constants.NOTHING, Constants.WIN);
+                return Constants.WON;
+              }
+
+              turnHistory.addStep(player, drawnTile, discardTile);
 
               // does anyone want this?
               (function checkClaim() {
@@ -135,7 +144,7 @@
                   for(i=1; i<4; i++) {
                     bidx = (idx+i)%4;
                     bidder = players[bidx];
-                    bid = bidder.lookingFor(tile);
+                    bid = bidder.lookingFor(discardTile);
                     // better than current bid?
                     if(bid > bestBid) {
                       if(i>1 && bid<Constants.PUNG) continue;
@@ -148,34 +157,36 @@
 
                   // if there is a valid bid, honour the claim
                   if (bestBid > 0) {
+                    drawnTile = discardTile;
                     console.log("claim bid accepted.");
                     player.unhighlight();
                     idx = bestBidder;
                     player = players[idx];
                     player.highlight();
-                    player.claim(tile, bestBid);
+                    player.claim(drawnTile, bestBid);
 
                     // if this was for a kong, the player gets a supplement tile
                     if(bestBid === Constants.PUNG) {
                       console.log(player.name+" played a kong. Issuing supplement tile.");
                       player.draw(wall, true);
                     }
-                    var newTile = player.discard();
-                    if(newTile === Constants.WIN) {
-                      throw "winner!";
+                    discardTile = player.discard();
+                    if(discardTile === Constants.WIN || discardTile === Constants.NOTHING) {
+                      turnHistory.addStep(player, drawnTile, Constants.NOTHING, Constants.WIN);
+                      return Constants.WON;
                     }
                     player.sort();
-                    console.log(player.name + " discards [" + Tiles.getTileName(newTile) + "] after claiming [" + Tiles.getTileName(tile) + "]");
-                    tile = newTile;
+                    turnHistory.addStep(player, drawnTile, discardTile, bestBid);
+                    console.log(player.name + " discards [" + Tiles.getTileName(discardTile) + "] after claiming [" + Tiles.getTileName(drawnTile) + "]");
                   }
                 }
 
                 console.log("no one wants it.");
-                discardsDiv.appendChild(tile);
+                discardsDiv.appendChild(discardTile);
               }());
 
               // successful tile
-              return true;
+              return Constants.CONTINUE;
             }
           }(players, wall, discards));
         }());  // end of runGame()
@@ -186,7 +197,11 @@
         window.autoplay = function() {
           if(interrupt) return;
           if(!wall.isDead()) {
-            if (!gameLoop()) {
+            var result = gameLoop();
+            if (result === Constants.WON) {
+              throw "won";
+            }
+            if (result === Constants.DRAWN) {
               setupGame();
             }
             setTimeout(autoplay, 5);

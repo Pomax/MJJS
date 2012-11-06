@@ -7,6 +7,11 @@ var Constants = {
   NOTILE: -1,
   HANDSIZE: 14,
 
+  // game turn types
+  CONTINUE:        0,
+  DRAWN:           1,
+  WON:             2,
+
   // set types
   NOTHING:        -1,
   SINGLE:          0,
