@@ -46,30 +46,38 @@ or
 (this depends on the rule set. The concept of rotation is universal, however).
 
 When the player who started as "east" becomes "east" again, the "wind of the
-round" is changed. The happens four times, giving the following minimal play
+round" is changed. The happens three times, giving the following minimal play
 table:
 
         P1  P2  P3  P4  round
         --  --  --  --  -----
-     1   E   S   W   N   E
-     2   S   W   N   E   E
-     3   W   N   E   S   E
-     4   N   E   S   W   E
+     1   E   S   W   N    E
+     2   S   W   N   E    E
+     3   W   N   E   S    E
+     4   N   E   S   W    E
 
-     5   E   S   W   N   S
-     6   S   W   N   E   S
-     7   W   N   E   S   S
-     8   N   E   S   W   S
+P1, who started as east, becomes east again, so the "round" wind advances:
 
-     9   E   S   W   N   W
-    10   S   W   N   E   W
-    11   W   N   E   S   W
-    12   N   E   S   W   W
+     5   E   S   W   N    S
+     6   S   W   N   E    S
+     7   W   N   E   S    S
+     8   N   E   S   W    S
 
-    13   E   S   W   N   N
-    14   S   W   N   E   N
-    15   W   N   E   S   N
-    16   N   E   S   W   N
+And again:
+
+     9   E   S   W   N    W
+    10   S   W   N   E    W
+    11   W   N   E   S    W
+    12   N   E   S   W    W
+
+And one final time:
+
+    13   E   S   W   N    N
+    14   S   W   N   E    N
+    15   W   N   E   S    N
+    16   N   E   S   W    N
+
+The game is done when P1 would otherwise become east a fifth time.
 
 Typically, there are additional rules which may lead to hands being "repeated"
 either when the player who represents "east" wins, or when a hand is drawn.
@@ -95,25 +103,27 @@ When a discard is made, an interrupt may occur in the form of any of the other p
 The rules for claiming are simple. A tile may be claimed if it can be used by a player to:
 
   a) form a chow, but ONLY by the player whose turn it would normally be if no one claimed the tile.
-     - these tiles must be revealed and are considered locked
+     - the tiles forming the chow must be revealed, and can no longer be used to form other patterns
   b) form a pung.
-     - these tiles must be revealed and are considered locked
+     - the tiles forming the pung must be revealed, and can no longer be used to form other patterns
   c) form a kong.
-     - these tiles must be revealed and are considered locked
-     - as forming a kong takes away two tiles for one tile claimed, the player is issued a supplement tile from the set of unplayed tiles
+     - the tiles forming the kong must be revealed, and can no longer be used to form other patterns
+     - as forming a kong takes away two tiles, for one tile claimed, the player is issued a supplement tile from the set of unplayed tiles.
   d) win, by forming a pair, chow, or pung.
      - the set that is formed with this tile must be revealed.
 
 If a tile is claimed by a player, it becomes their turn, and the claim replaces the "draw" step of their turn.
 If a tile is not claimed, the next player goes through their turn steps.
+If multiple claims are made, who gets the tile depends on what they need it for. In ascending priority: win, kong/pung, chow.
 
 Game turns are played until the set of unplayed tiles ("the wall") is depleted.
-  (most rule sets consider a small set of tiles at the end of the wall
-  unplayable tiles, leading to there being no more tiles available to
-  draw even if there is still some wall left)
 
-If the wall is depleted before someone has formed a winning hand, the hand is drawn.
-Depending on the rule set, either the hand is replayed (the winds do not rotate),
+  (most rule sets consider a small set of tiles at the end of the wall
+  "unplayable tiles", leading to there being no more tiles available to
+  draw, even if there is still some wall left)
+
+If the wall is depleted before someone has formed a winning hand, the hand is considered
+"drawn". Depending on the rule set, either the hand is replayed (the winds do not rotate),
 or the next hand is played (the winds do rotate).
 
 
@@ -134,7 +144,7 @@ Additionally, sets of specific tiles may score more than others. If scores
 are assigned based on the "tile face" for a set, the following
 rankings are typically observed:
 
-  numeral < terminal number (1 or 9) < wind < scoring wind (own or round) or dragon
+  numeral < terminal number (1 or 9) < wind < scoring wind (i.e. own wind or wind of the round) or dragon
 
 Additional points may be rewarded for different stages of "clean"liness,
 refering to whether tiles form different suits are mixed
@@ -160,14 +170,14 @@ category:
   a) "heavenly hand": the player who represents "east" has a winning pattern on his
      or her first drawn tile. This is the least statistically likely hand.
 
-  b) "thirteen orphans": this hand consistsof the a 1 and 9 of each suit, as well
-     as one of each winds and one of each dragon. This gives a player 13 distinct
-     tiles, and the hand is completed with any tile that forms a pair with one of
-     the 13 unique tiles.
+  b) "thirteen orphans": this hand consists of the a 1 and 9 tiles for each suit,
+     as well as one of each winds and one of each dragon. This gives a player 13
+     distinct tiles ("orphans"), and the hand is considered a winning hand if the 14th
+     tile forms a pair with any of the orphans.
 
 Usually a third "universal" pattern is acknowledged, called the "earthly" hand, where
-a player not representing "east" can form a winning hand by claiming east's first
-discard. This is as statistically likely as the "heavenly" hand.
+a player not representing "east" can form a winning hand by claiming east's very first
+discard. This hand is statistically as likely as the "heavenly" hand.
 
 
 Tactics
