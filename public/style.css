@@ -28,7 +28,7 @@ p { line-height: 1em; }
 }
 
 #players .player {
-  border: 1px solid transparent;
+  border: 1px solid transparent;`
 }
 
 #players .player.highlight {

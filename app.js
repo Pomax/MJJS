@@ -17,8 +17,7 @@ var js = function(_, res, next) {
 app.use(express.static('public'));
 
 app.use(js);
-app.use(express.static('src/core'));
-app.use(express.static('src/utils'));
+app.use('/src', express.static('src'));
 
 app.listen(3000, function() {
   console.log('Express server listening on port 3000');
