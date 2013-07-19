@@ -89,6 +89,8 @@ var Tiles = {
     return Constants.NOTHING;
   },
   getTileType: function(tileNumber, tileList) {
+    var isPair = false;
+
     // part of a pair?
     if(tileList.indexOf(tileNumber) !== -1) {
       // we know we can use it for a pair, but can we use it for a pung?
@@ -102,15 +104,15 @@ var Tiles = {
         // we can't use it for a kong, so: pung it is.
         return Constants.PUNG;
       }
-      // we can't use it for a pung, so: pair it is.
-      return Constants.PAIR;
+      // we can't use it for a pung. So this might be a Chow.
+      isPair = true;
     }
 
-    // We can't chow honours. This might "break" for rule sets, but for now we don't care about those.
-    if (tileNumber >= Constants.HONOURS) { return Constants.SINGLE; }
-
     // if we get here, we might be able to form a chow from a connected pair or gapped chow
-    var bestType = Constants.SINGLE;
+    var bestType = (isPair ? Constants.PAIR : Constants.SINGLE);
+
+    // We can't chow honours. This might "break" for rule sets, but for now we don't care about those.
+    if (tileNumber >= Constants.HONOURS) { return bestType; }
 
     // part of a connected pair or gapped chow?
     var prev2 = tileNumber-2;
@@ -147,7 +149,7 @@ var Tiles = {
       else { bestType = Math.max(bestType, Constants.GAPPED); }
     }
 
-    // definitely singleton
+    // definitely not a chow.
     return bestType;
   },
   // FIXME: this function is broken - it does not take into account
@@ -155,6 +157,8 @@ var Tiles = {
   //        as locked. This function should move tiles from
   //        concealed to locked, instead, and re-evaluate the tile
   //        values based on this more rigid hand.
+  //
+  //        Broken example: isWinningPattern([6,6,7,19,20,21,22,23,24,25,8], [2,2,8,8,8,8,8,8,8,8,8],{size:function() { return 1; }})
   isWinningPattern: function(concealed, values, open) {
     var setCount = 4 - open.size();
     var pairCount = 1;
@@ -179,9 +183,9 @@ var Tiles = {
     }
     console.log("win result: "+setCount+"/"+pairCount);
 
-    if(setCount===0 && pairCount===0) {
-      console.log("win result: "+setCount+"/"+pairCount);
+    if(setCount === 0 && pairCount === 0) {
+      console.log("win result: "+setCount+"/"+pairCount+" (sum is "+(setCount+pairCount)+")");
     }
-    return (setCount+pairCount===0);
+    return (setCount+pairCount === 0);
   }
 };

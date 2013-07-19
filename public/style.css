@@ -8,9 +8,18 @@ p { line-height: 1em; }
 #wall {
   line-height: 10px;
 }
+#wall, #discards, #players {
+  background: url(felt.png);
+}
 
 #players {
   border: 1px solid black;
+  text-shadow: 0px 0px 5px black,
+               0px 0px 2px black,
+               0px 0px 2px black,
+               0px 0px 10px black;
+  color: rgb(255, 255, 255);
+  font-size: 110%;
 }
 
 #players .player:before {
@@ -23,7 +32,7 @@ p { line-height: 1em; }
 }
 
 #players .player.highlight {
-  background-color: orange;
+  background-color: rgba(255,127,0,0.6);
 }
 
 #players .player .hand .bank {
@@ -33,18 +42,18 @@ p { line-height: 1em; }
   display: inline-block;
 }
 
-#players .player .hand .bank.open .tile {
-  border: none;
-  margin: 2px;
+#players .run + .set,
+#players .run + .run,
+#players .set + .run,
+#players .set + .set {
+  margin-left: 0.5em;
 }
 
-#players .player .concealed.bank { background-color: rgb(200,255,200); }
-#players .player .open.bank     { background-color: rgb(255,200,200); }
-#players .player .bonus.bank    { background-color: rgb(200,200,255); }
-
-#players .run { margin: 0 0.5em; }
-#players .set { margin: 0 0.5em; }
-#players .run + .set { margin-left: 0em; }
-#players .run + .run { margin-left: 0em; }
-#players .set + .run { margin-left: 0em; }
-#players .set + .set { margin-left: 0em; }
+.declared.bank,
+.won .highlight .concealed.bank,
+.won .highlight .bonus.bank {
+  background: url(retina_wood.png);
+  padding: 0.7em 0.7em 0.2em;
+  margin: 0 5px;
+  border: 1px solid rgb(83, 45, 6);
+}

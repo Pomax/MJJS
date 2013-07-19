@@ -21,7 +21,7 @@ var Hand = function() {
 
 Hand.prototype = {
   // add a tile to this hand
-  add: function(tile) { this.concealed.add(tile); },
+  add: function(tile) { this.concealed.add(tile); this.concealed.sort(); },
   // add a bonus tile to this hand
   addBonus: function(tile) { tile.reveal(); this.bonus.add(tile); this.bonus.sort(); },
   // remove a tile from this hand (we can only remove concealed tiles)
@@ -74,12 +74,17 @@ Hand.prototype = {
       var tileNumber = discards.splice(0,1)[0];
       return this.concealed.removeTileByNumber(tileNumber);
     } else {
-      console.log("difficult hand");
+      console.log("difficult hand:");
+      console.log(this.concealed.toTileNumbers(), this.open.toTileNumbers());
+
+      // for each tile "t", get the value of "t", given {hand with "t" removed}
       var values = [];
       var concealed = this.concealed.toTileNumbers();
       concealed.forEach(function(t) {
-        var copied = concealed.slice(0);
+        // form {hand with "t" removed}
+        var copied = concealed.slice();
         copied.splice(copied.indexOf(t),1);
+        // compute "t" value
         values.push(Tiles.getTileType(t, copied));
       });
       console.log("tile values: "+values);
@@ -88,6 +93,7 @@ Hand.prototype = {
       // just won, or because we have a difficult hand in which all
       // tiles are already useful. Find out which it is.
       if (Tiles.isWinningPattern(concealed, values, this.open)) {
+        console.log("player holds a winning pattern");
         return Constants.WIN;
       }
 
