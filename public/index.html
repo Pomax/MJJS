@@ -4,49 +4,14 @@
     <meta charset="utf-8">
     <title>Mahjong implementation</title>
     <link rel="stylesheet" type="text/css" href="style.css">
-    <script src="src/utils/triggers.js"></script>
-
-    <script>
-      on("tile-mouseover", function(evt) {
-        // console.log("mouseover", evt);
-        var tile = evt.tile;
-        if(!tile.concealed) {
-          tile.setAttribute("title", Constants.tileNames[tile.tileNumber] + " (" + tile.tileNumber + ")");
-        }
-      });
-
-      on("tile-mouseout", function(evt) {
-        // console.log("mouseout", evt);
-      });
-
-      on("tile-click", function(evt) {
-        // console.log("click", evt);
-        evt.tile.reveal();
-      });
-    </script>
-
-    <script src="src/core/constants.js"></script>
-    <script src="src/core/tile.js"></script>
-    <script src="src/core/wall.js"></script>
-    <script src="src/utils/generator.js"></script>
-    <script src="src/utils/statistics.js"></script>
-    <script src="src/utils/strategies.js"></script>
-    <script src="src/core/sets.js"></script>
-    <script src="src/core/runs.js"></script>
-    <script src="src/core/declared.js"></script>
-    <script src="src/core/bank.js"></script>
-    <script src="src/core/hand.js"></script>
-    <script src="src/core/player.js"></script>
-
-    <script src="src/utils/turnhistory.js"></script>
-    <script src="src/utils/utilities.js"></script>
   </head>
 
   <body>
     <table><tr><td>
-      <button onclick="setupGame()">Reset the game</button>
-      <button onclick="setupGame(); autoplay()">Play game</button>
-      <button onclick="interrupt = true">Interrupt</button>
+      <button class="reset button">Reset the game</button>
+      <button class="play button">Play game</button>
+      <button class="interrupt button">Interrupt</button>
+      <button class="log button">Show play log</button>
     </td></tr><table>
 
     <table>
@@ -62,8 +27,48 @@
     <h2>The players</h2>
     <div id="players"></div>
 
+    <div id="history">
+      <h2>Play log</h2>
+      <div id="log"></div>
+    </div>
+
     <p style="text-align:right"><a href="https://github.com/Pomax/MJJS/tree/gh-pages">This is a work in progress, code on github.com</a></p>
 
-    <script src="main.js"></script>
+    <div class="script block">
+      <script src="src/utils/triggers.js"></script>
+      <script>
+        on("tile-mouseover", function(evt) {
+          // console.log("mouseover", evt);
+          var tile = evt.tile;
+          if(!tile.concealed) {
+            tile.setAttribute("title", Constants.tileNames[tile.tileNumber] + " (" + tile.tileNumber + ")");
+          }
+        });
+
+        on("tile-mouseout", function(evt) {
+          // console.log("mouseout", evt);
+        });
+
+        on("tile-click", function(evt) {
+          // console.log("click", evt);
+          evt.tile.reveal();
+        });
+      </script>
+      <script src="src/core/constants.js"></script>
+      <script src="src/core/tile.js"></script>
+      <script src="src/core/wall.js"></script>
+      <script src="src/utils/generator.js"></script>
+      <script src="src/utils/statistics.js"></script>
+      <script src="src/utils/strategies.js"></script>
+      <script src="src/core/sets.js"></script>
+      <script src="src/core/runs.js"></script>
+      <script src="src/core/declared.js"></script>
+      <script src="src/core/bank.js"></script>
+      <script src="src/core/hand.js"></script>
+      <script src="src/core/player.js"></script>
+      <script src="src/utils/turnhistory.js"></script>
+      <script src="src/utils/utilities.js"></script>
+      <script src="main.js"></script>
+    </div>
   </body>
 </html>

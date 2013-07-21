@@ -28,11 +28,17 @@ p { line-height: 1em; }
 }
 
 #players .player {
-  border: 1px solid transparent;`
+  display: block;
+  border: 1px solid transparent;
 }
 
 #players .player.highlight {
   background-color: rgba(255,127,0,0.6);
+}
+
+#players .player .hand {
+  display: block;
+  height: 71px;
 }
 
 #players .player .hand .bank {
@@ -56,4 +62,26 @@ p { line-height: 1em; }
   padding: 0.7em 0.7em 0.2em;
   margin: 0 5px;
   border: 1px solid rgb(83, 45, 6);
+}
+
+#history {
+  display: none;
+  position: absolute;
+  height: 80%;
+  width: 80%;
+  top: 10%;
+  left: 10%;
+  right: 10%;
+  bottom: 10%;
+  background-color: white;
+  border: 10px solid lightblue;
+  border-radius: 10px;
+  padding: 0.5em;
+  box-shadow: 0 0 20px 5px gray;
+  overflow-y: scroll;
+}
+
+#log {
+  line-height: 1.2em;
+  font-family: monospace;
 }

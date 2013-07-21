@@ -5,9 +5,10 @@
  * tile management during play.
  */
 
-var Player = function(name) {
+var Player = function(name, computer) {
   this.name = name;
   this.hand = new Hand();
+  this.computer = !!computer;
 };
 
 Player.prototype = {
@@ -22,12 +23,22 @@ Player.prototype = {
   draw: function(wall, supplement) {
     var tile = (supplement ? wall.drawSupplement() : wall.draw());
     if(tile === Constants.NOTILE) return Constants.NOTILE;
+
     while(Tiles.isBonus(tile)) {
       this.hand.addBonus(tile);
       tile = (supplement ? wall.drawSupplement() : wall.draw());
       if(tile === Constants.NOTILE) return Constants.NOTILE;
     }
+
     this.hand.add(tile);
+    // FIXME: if this tile draws us a kong, immediately play it
+    //        This is not good play policy, but it helps right now.
+    while(this.hand.hasKong(tile)) {
+      this.play(tile, Constants.KONG);
+      tile = wall.drawSupplement();
+      this.hand.add(tile);
+    }
+
     this.determineStrategy();
     return tile;
   },
@@ -41,29 +52,11 @@ Player.prototype = {
   discard: function(tile) {
     var hand = this.hand;
     if(tile) { hand.remove(tile); }
-    else { tile = hand.pickDiscard(); }
+    else { tile = hand.pickDiscard(this.computer); }
 
     if(tile === Constants.NOTILE || tile === Constants.WIN) {
       return tile;
     }
-
-/*
-    // Did this player just break up a pair? I want to know if they did.
-    if(this.hand.concealed.contains(tile)) {
-      console.log("PLAYER BROKE UP A PAIR!");
-      console.log("discard:");
-      console.log("  "+tile.tileNumber+" ("+Tiles.getTileName(tile)+")");
-      console.log("hand:");
-      console.log("  concealed: "+hand.concealed.toTileNumbers());
-      console.log("  open: "+hand.open.toTileNumbers());
-      console.log("strategy:");
-      console.log("  required: "+hand.strategy.required);
-      console.log("  role: "+hand.strategy.role);
-      console.log("  discard: "+hand.strategy.discard);
-      throw "Player just broke up a pair. Why?"
-    }
-*/
-
     this.determineStrategy();
     return tile;
   },
@@ -76,7 +69,12 @@ Player.prototype = {
   // determine the play strategy
   determineStrategy: function(wall) { return this.hand.determineStrategy(wall); },
   // are we looking for this tile?
-  lookingFor: function(tile) { return this.hand.lookingFor(tile); },
+  lookingFor: function(tile) {
+    // TODO: computer vs. human player
+    return this.hand.lookingFor(tile);
+  },
+  // bid on a tile
+  bid: function(tile, sendBid) { sendBid(this, this.lookingFor(tile)); },
   // highlight player as "current player" (HTML)
   highlight: function() { if(this.el) { this.el.classList.add("highlight"); }},
   // unhighlight player as no longer being "current player" (HTML)

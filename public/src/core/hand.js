@@ -62,6 +62,10 @@ Hand.prototype = {
     this.open.sort();
     this.bonus.sort();
   },
+  // does the hand contain a kong?
+  hasKong: function(tile) {
+    return this.concealed.getCount(tile) === 4;
+  },
   // determine what we want to pay attention to during play
   determineStrategy: function(wall) {
     this.strategy = Strategies.pick(wall, this.concealed, this.open);
@@ -117,6 +121,21 @@ Hand.prototype = {
         if(pos !== -1) {
           tile = this.concealed.get(pos);
           console.log("pair discard O_O: "+tile);
+          this.concealed.remove(tile);
+          return tile;
+        }
+        // !!danger zone!!
+        pos = values.indexOf(Constants.KONG);
+        if(pos !== -1) {
+          tile = this.concealed.get(pos);
+          console.log("danger zone - pung discard O_O: "+tile);
+          this.concealed.remove(tile);
+          return tile;
+        }
+        pos = values.indexOf(Constants.PUNG);
+        if(pos !== -1) {
+          tile = this.concealed.get(pos);
+          console.log("danger zone - pung discard O_O: "+tile);
           this.concealed.remove(tile);
           return tile;
         }

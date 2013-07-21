@@ -1,4 +1,4 @@
-function newHistory() {
+function newHistory(el) {
 
   var Step = function(player, drawn, discarded, claimType) {
     this.playerName = player.name;
@@ -10,10 +10,43 @@ function newHistory() {
     this.claimType = (claimType ? claimType : Constants.NOTHING);
   };
 
+  Step.prototype.toString = function () {
+    with(this) {
+      return  playerName + " " +
+              (claimType === Constants.NOTHING ?
+                "drew" : "claimed"
+              ) +
+              " " + Constants.tileNames[drawn] + " (" + drawn + ")"+
+              (claimType !== Constants.NOTHING ?
+                ", as " + Constants.setNames[claimType]
+                :
+                ""
+              ) +
+              (discard !== Constants.NOTHING?
+                ", discarded " + Constants.tileNames[discard] + " (" + discard + ")"
+                :
+                ""
+              );
+    }
+  }
+
   var history = {
     steps: [],
-    addStep: function(player, drawn, discarded) {
-      this.steps.push(new Step(player, drawn, discarded));
+    initial: [],
+    setInitial: function(players) {
+      var initial = this.initial;
+      players.forEach(function(player){
+        initial[player.name] = {
+          tiles: player.hand.concealed.toTileNumbers()
+        };
+        el.innerHTML += player.name + " starts with [" + initial[player.name].tiles + "] <br>";
+      });
+      el.innerHTML += "<br>";
+    },
+    addStep: function(player, drawn, discarded, claimType) {
+      var step = new Step(player, drawn, discarded, claimType);
+      this.steps.push(step);
+      el.innerHTML += step.toString() + "<br>";
     },
     getSteps: function() {
       return this.steps;

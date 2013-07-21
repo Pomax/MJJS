@@ -31,6 +31,19 @@ Bank.prototype = {
   get: function(idx) {
     return this.tiles[idx];
   },
+  // count how many times this tile exists in the hand
+  getCount: function(tile) {
+    var tileNumber = tile.tileNumber;
+    var i=this.tiles.length;
+    var ccount = 0;
+    while(i-->0) {
+      tile = this.tiles[i];
+      if(tile.tileNumber===tileNumber) {
+        ccount++;
+      }
+    }
+    return ccount;
+  },
   // get a tile by tile number
   removeTileByNumber: function(tileNumber) {
     var tile, i=this.tiles.length;
