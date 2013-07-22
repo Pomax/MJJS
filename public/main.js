@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", function() {
         best: Constants.NOTHING
       },
       turnInterval = window.location.getQueryValue("turnInterval") || 1,
-      bidInterval  = window.location.getQueryValue("bidInterval") || 2000,
+      bidInterval  = window.location.getQueryValue("bidInterval") || false,
       openPlay     = window.location.getQueryValue("openPlay") || false,
       autoPlay     = window.location.getQueryValue("autoPlay") || false;
 

@@ -76,7 +76,7 @@ Player.prototype = {
   // bid on a tile
   // FIXME: the bid, right now, represents what a player *has*, not what
   //        they want the tile for. This is a pretty bad bug!
-  bid: function(tile, sendBid, bidTimeout) {
+  bid: function(tile, sendBid, bidInterval) {
     if(this.computer) {
       sendBid(this, this.lookingFor(tile));
     } else {
@@ -98,12 +98,14 @@ Player.prototype = {
         dialog.appendChild(button);
       });
       document.getElementById("playerClaim").appendChild(dialog);
-      setTimeout(function() {
-        if(dialog.parentNode) {
-          dialog.parentNode.removeChild(dialog);
-          sendBid(player, Constants.NOTHING);
-        }
-      }, bidTimeout);
+      if(bidInterval) {
+        setTimeout(function() {
+          if(dialog.parentNode) {
+            dialog.parentNode.removeChild(dialog);
+            sendBid(player, Constants.NOTHING);
+          }
+        }, bidInterval);
+      }
     }
   },
   // highlight player as "current player" (HTML)
