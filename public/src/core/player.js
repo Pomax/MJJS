@@ -32,7 +32,8 @@ Player.prototype = {
 
     this.hand.add(tile);
     // FIXME: if this tile draws us a kong, immediately play it
-    //        This is not good play policy, but it helps right now.
+    //        This is not good play policy, but it helps prevent
+    //        a "locked" hand for computer players for the moment.
     while(this.hand.hasKong(tile)) {
       this.play(tile, Constants.KONG);
       tile = wall.drawSupplement();
@@ -69,12 +70,42 @@ Player.prototype = {
   // determine the play strategy
   determineStrategy: function(wall) { return this.hand.determineStrategy(wall); },
   // are we looking for this tile?
-  lookingFor: function(tile) {
-    // TODO: computer vs. human player
-    return this.hand.lookingFor(tile);
-  },
+  // FIXME: this currently represents what a player *has*, not what
+  //        they want the tile for. This is a pretty bad bug!
+  lookingFor: function(tile) { return this.hand.lookingFor(tile); },
   // bid on a tile
-  bid: function(tile, sendBid) { sendBid(this, this.lookingFor(tile)); },
+  // FIXME: the bid, right now, represents what a player *has*, not what
+  //        they want the tile for. This is a pretty bad bug!
+  bid: function(tile, sendBid, bidTimeout) {
+    if(this.computer) {
+      sendBid(this, this.lookingFor(tile));
+    } else {
+      var player = this;
+      // generate a dialog for the user to click through
+      // FIXME: the code path that gets this bid actually treats
+      //        the bid as a "I have this" rather than "I need the
+      //        tile for .." indicator.
+      var dialog = document.createElement("div");
+      dialog.setAttribute("class", "bid dialog");
+      [Constants.NOTHING, Constants.PAIR, Constants.CHOW, Constants.PUNG, Constants.KONG].forEach(function(s){
+        var button = document.createElement("button");
+        button.setAttribute("data-value", s);
+        button.innerHTML = Constants.setNames[s];
+        button.onclick = function() {
+          dialog.parentNode.removeChild(dialog);
+          sendBid(player, s);
+        };
+        dialog.appendChild(button);
+      });
+      document.getElementById("playerClaim").appendChild(dialog);
+      setTimeout(function() {
+        if(dialog.parentNode) {
+          dialog.parentNode.removeChild(dialog);
+          sendBid(player, Constants.NOTHING);
+        }
+      }, bidTimeout);
+    }
+  },
   // highlight player as "current player" (HTML)
   highlight: function() { if(this.el) { this.el.classList.add("highlight"); }},
   // unhighlight player as no longer being "current player" (HTML)

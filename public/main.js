@@ -27,14 +27,15 @@ document.addEventListener("DOMContentLoaded", function() {
         TURN: 7,
         INTERRUPTED: 8,
         CLAIMPROCESS: 9
-      }
+      },
       gameState = states.STALE,
-      turnInterval =  window.location.getQueryValue("turnInterval") || 1,
       claims = {
         best: Constants.NOTHING
-      };
-
-
+      },
+      turnInterval = window.location.getQueryValue("turnInterval") || 1,
+      bidInterval  = window.location.getQueryValue("bidInterval") || 2000,
+      openPlay     = window.location.getQueryValue("openPlay") || false,
+      autoPlay     = window.location.getQueryValue("autoPlay") || false;
 
   /**
    * someone has won the hand.
@@ -42,6 +43,9 @@ document.addEventListener("DOMContentLoaded", function() {
   var processWin = function(player) {
     console.log(player.name + " has won this hand.");
     gameState = states.WON;
+    players.forEach(function(player) {
+      player.reveal();
+    })
     return Constants.WON;
   };
 
@@ -65,7 +69,7 @@ document.addEventListener("DOMContentLoaded", function() {
     players = [];
     options = options || {
       players: [
-        { name: "Pomax", computer: false },
+        { name: "Pomax", computer: autoPlay },
         { name: "Defense Cat", computer: true },
         { name: "Yellow Dragon", computer: true },
         { name: "Tonbot5000", computer: true }
@@ -114,7 +118,9 @@ document.addEventListener("DOMContentLoaded", function() {
     // show what each player has in their hand
     players.forEach(function(player) {
       player.sort();
-      player.reveal();
+      if(openPlay || player === players[0]) {
+        player.reveal();
+      }
     });
 
     gameState = states.SETUP;
@@ -152,12 +158,14 @@ document.addEventListener("DOMContentLoaded", function() {
    * This function checks whether a discard is wanted by
    * any of the players, using a bidding system.
    */
-  var checkClaim = function(player, discard) {
+  var checkClaims = function(player, discard) {
+    discard.reveal();
+    document.getElementById("discard").appendChild(discard);
     gameState = states.CHECKCLAIM;
     startClaimListening(player, discard);
     players.forEach(function(otherplayer){
       if(otherplayer===player) return;
-      otherplayer.bid(discard, getBid);
+      otherplayer.bid(discard, getBid, bidInterval);
     });
   };
 
@@ -170,7 +178,9 @@ document.addEventListener("DOMContentLoaded", function() {
         drawnTile = claims.tile;
 
     // no bids, or the best claim is a chow by someone who can't get that chow: normal discard.
-    if(bestBid===Constants.NOTHING || (bestBid===Constants.CHOW && claims.bestBidder!==claims.discardingPlayer.next)) {
+    var chowCall =(bestBid===Constants.GAPPED || bestBid===Constants.CONNECTED),
+        illegalChow = chowCall && (claims.bestBidder !== claims.discardingPlayer.next);
+    if(bestBid===Constants.NOTHING || illegalChow) {
       document.getElementById("discards").appendChild(drawnTile);
       nextTurn(claims.discardingPlayer);
       return;
@@ -179,6 +189,7 @@ document.addEventListener("DOMContentLoaded", function() {
     claims.discardingPlayer.unhighlight();
     player = claims.bestBidder;
     player.highlight();
+    document.getElementById("discard").innerHTML = "";
     player.claim(drawnTile, claims.best);
 
     // if this was for a kong, the player gets a supplement tile
@@ -195,10 +206,9 @@ document.addEventListener("DOMContentLoaded", function() {
       return processWin(player);
     }
 
-    player.sort();
     turnHistory.addStep(player, drawnTile, discardTile, bestBid);
     console.log(player.name + " discards [" + Tiles.getTileName(discardTile) + "] after claiming [" + Tiles.getTileName(drawnTile) + "]");
-    checkClaim(player, discardTile);
+    checkClaims(player, discardTile);
   };
 
   /**
@@ -234,7 +244,9 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     // show the drawn tile, and play
-    drawnTile.reveal();
+    if(openPlay || player===players[0]) {
+      drawnTile.reveal();
+    }
     console.log(player.name + " drew [" + Tiles.getTileName(drawnTile)+ "] from the wall");
 
     var discardTile = player.discard();
@@ -252,7 +264,7 @@ document.addEventListener("DOMContentLoaded", function() {
     turnHistory.addStep(player, drawnTile, discardTile, Constants.NOTHING);
 
     // check whether any of the other players want this tile
-    var result = checkClaim(player, discardTile);
+    var result = checkClaims(player, discardTile);
   }
 
   /**

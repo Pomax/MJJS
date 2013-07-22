@@ -85,3 +85,18 @@ p { line-height: 1em; }
   line-height: 1.2em;
   font-family: monospace;
 }
+
+.bid.dialog {
+  display: inline-block;
+  width: 66px;
+  line-height: 1.2em;
+  background-color: white;
+  border: 10px solid lightblue;
+  border-radius: 10px;
+  text-align: center;
+  margin-top: 2em;
+}
+
+.bid.dialog button {
+  width: 100%;
+}

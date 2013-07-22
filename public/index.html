@@ -12,7 +12,7 @@
       <button class="play button">Play game</button>
       <button class="interrupt button">Interrupt</button>
       <button class="log button">Show play log</button>
-    </td></tr><table>
+    </td></tr></table>
 
     <table>
       <tr><td style="width: 50%; vertical-align: top;">
@@ -25,7 +25,17 @@
     </table>
 
     <h2>The players</h2>
-    <div id="players"></div>
+    <table style="width: 100%;">
+      <tr>
+        <td>
+          <div id="players"></div>
+        </td>
+        <td style="min-width: 100px; width: 10%; text-align: center; vertical-align: middle">
+          <div id="discard"></div>
+          <div id="playerClaim"></div>
+        </td>
+      </tr>
+    </table>
 
     <div id="history">
       <h2>Play log</h2>
