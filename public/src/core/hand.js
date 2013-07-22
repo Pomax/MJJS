@@ -146,6 +146,8 @@ Hand.prototype = {
     return this.concealed.removeTileByNumber(this.concealed.get(0).tileNumber);
   },
   // are we looking for this tile?
+  // FIXME: the bid, right now, represents what a player *has*, not what
+  //        they want the tile for. This is a pretty bad bug!
   lookingFor: function(tile) {
     var pos = this.strategy.required.indexOf(tile.tileNumber);
     if (pos===-1) return Constants.NOTHING;

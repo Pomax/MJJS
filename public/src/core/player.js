@@ -31,6 +31,7 @@ Player.prototype = {
     }
 
     this.hand.add(tile);
+
     // FIXME: if this tile draws us a kong, immediately play it
     //        This is not good play policy, but it helps prevent
     //        a "locked" hand for computer players for the moment.
@@ -39,6 +40,10 @@ Player.prototype = {
       tile = wall.drawSupplement();
       this.hand.add(tile);
     }
+
+    // TODO: if we have a pung of this tile on the table, we need
+    //       to decide whether or not to append that pung to form
+    //       a kong, or keep it in hand for a chow.
 
     this.determineStrategy();
     return tile;
