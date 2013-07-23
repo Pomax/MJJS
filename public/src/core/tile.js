@@ -81,11 +81,18 @@ var Tiles = {
     if(s1 != s3) return false;
     return true;
   },
-  getClaimType: function(tileType) {
-    if(tileType === Constants.CONNECTED)    return Constants.CHOW;
-    else if(tileType === Constants.GAPPED) return Constants.CHOW;
-    else if(tileType === Constants.PAIR)   return Constants.PUNG;
-    else if(tileType === Constants.PUNG)   return Constants.KONG;
+  getClaimType: function(holdType) {
+    if(holdType === Constants.CONNECTED)    return Constants.CHOW;
+    else if(holdType === Constants.GAPPED) return Constants.CHOW;
+    else if(holdType === Constants.PAIR)   return Constants.PUNG;
+    else if(holdType === Constants.PUNG)   return Constants.KONG;
+    return Constants.NOTHING;
+  },
+  getClaimReason: function(claimType) {
+    if(claimType === Constants.PAIR)    return Constants.SINGLE;
+    else if(claimType === Constants.CHOW)    return Constants.CONNECTED;
+    else if(claimType === Constants.PUNG)   return Constants.PAIR;
+    else if(claimType === Constants.KONG)   return Constants.PUNG;
     return Constants.NOTHING;
   },
   getTileType: function(tileNumber, tileList) {

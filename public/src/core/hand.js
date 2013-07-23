@@ -150,9 +150,15 @@ Hand.prototype = {
   //        they want the tile for. This is a pretty bad bug!
   lookingFor: function(tile) {
     var pos = this.strategy.required.indexOf(tile.tileNumber);
-    if (pos===-1) return Constants.NOTHING;
+    if (pos===-1) return {
+      inhand: Constants.NOTHING,
+      claimType: Constants.NOTHING
+    };
     var role = this.strategy.role[pos];
-    return role;
+    return {
+      inhand: role,
+      claimType: Tiles.getClaimType(role)
+    };
   },
   // this hand as HTML element
   asHTMLElement: function(update) {

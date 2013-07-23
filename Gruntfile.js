@@ -14,7 +14,7 @@ module.exports = function( grunt ) {
       files: [
         "./*.js",
         "./lib/**/*.js",
-        "./src/**/*.js"
+        "./public/**/*.js"
       ]
     }
   });

@@ -2,9 +2,9 @@ window.location.getQueryValue = function(key) {
   var str = window.location.toString();
   var re = new RegExp(key + "=\\w+");
   var match = str.match(re);
-  if(!match) return ""
+  if(!match) return "";
   return match[0].replace(key+"=",'');
-}
+};
 
 document.addEventListener("DOMContentLoaded", function() {
   // game variables
@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded", function() {
     gameState = states.WON;
     players.forEach(function(player) {
       player.reveal();
-    })
+    });
     return Constants.WON;
   };
 
@@ -63,7 +63,10 @@ document.addEventListener("DOMContentLoaded", function() {
    * Initial game setup
    */
   var setupGame = function(options) {
-    if(gameState===states.SETUP) return;
+    if(gameState === states.SETUP) {
+      return;
+    }
+
     turnHistory = newHistory(document.getElementById("log"));
     wall = new Wall();
     players = [];
@@ -100,13 +103,15 @@ document.addEventListener("DOMContentLoaded", function() {
       document.getElementById("players").appendChild(player.asHTMLElement());
     });
 
-    for(var i=0; i < players.length; i++) {
+    var i;
+
+    for(i=0; i < players.length; i++) {
       players[i].next = players[(i+1)%4];
       players[i].previous = players[(i+3)%4];
     }
 
     // draw tiles for each player
-    for(var i=0; i < Constants.HANDSIZE - 1; i++) {
+    for(i=0; i < Constants.HANDSIZE - 1; i++) {
       players.forEach(function(player) {
         player.draw(wall);
       });
@@ -126,6 +131,18 @@ document.addEventListener("DOMContentLoaded", function() {
     gameState = states.SETUP;
   };
 
+  // get the current player's discard.
+  var getDiscard = function(player, discardTile) {
+    if(discardTile === Constants.WIN || discardTile === Constants.NOTHING) {
+      turnHistory.addStep(player, drawnTile, Constants.NOTHING, Constants.WIN);
+      return processWin(player);
+    }
+    turnHistory.addStep(player, drawnTile, discardTile);
+    console.log(player.name + " discards [" + Tiles.getTileName(discardTile) + "] after claiming [" + Tiles.getTileName(drawnTile) + "]");
+    checkClaims(player, discardTile);
+  };
+
+
   /**
    *
    */
@@ -136,13 +153,14 @@ document.addEventListener("DOMContentLoaded", function() {
       discardingPlayer: player,
       best: Constants.NOTHING,
       bestBidder: false
-    }
+    };
   };
 
   /**
    * Discard claim bid aggregator
    */
-  var getBid = function(player, bid) {
+  var getBid = function(player, response) {
+    var bid = response.inhand;
     if(bid > claims.best) {
       console.log(player.name + " wants this tile (bid: "+bid+", to form a "+Constants.setNames[Tiles.getClaimType(bid)]+").");
       console.log(player.name + " currently holds " + player.hand.concealed.toTileNumbers()+", requires " + player.hand.strategy.required);
@@ -198,17 +216,8 @@ document.addEventListener("DOMContentLoaded", function() {
       player.draw(wall, true);
     }
 
-    // after claiming the tile, the claiming player has either
-    // won, or they need to discard a tile themselves.
-    var discardTile = player.discard();
-    if(discardTile === Constants.WIN || discardTile === Constants.NOTHING) {
-      turnHistory.addStep(player, drawnTile, Constants.NOTHING, Constants.WIN);
-      return processWin(player);
-    }
-
-    turnHistory.addStep(player, drawnTile, discardTile, bestBid);
-    console.log(player.name + " discards [" + Tiles.getTileName(discardTile) + "] after claiming [" + Tiles.getTileName(drawnTile) + "]");
-    checkClaims(player, discardTile);
+    // get the discard after this claim
+    player.discard(getDiscard);
   };
 
   /**
@@ -216,9 +225,9 @@ document.addEventListener("DOMContentLoaded", function() {
    */
   var nextTurn = function(player) {
     setTimeout(function() {
-      playTurn(player.next)
+      playTurn(player.next);
     }, turnInterval);
-  }
+  };
 
 
   /**
@@ -249,23 +258,9 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     console.log(player.name + " drew [" + Tiles.getTileName(drawnTile)+ "] from the wall");
 
-    var discardTile = player.discard();
-    console.log(player.name + " discards "+discardTile.tileNumber+" [" + Tiles.getTileName(discardTile) + "]");
-    console.log(player.name + " now holds ["+player.hand.concealed.toTileNumbers()+" + " + player.hand.open.toTileNumbers() + "]");
-    player.sort();
-
-    // did this player just win?
-    if(discardTile === Constants.WIN || discardTile === Constants.NOTHING) {
-      turnHistory.addStep(player, drawnTile, Constants.NOTHING, Constants.WIN);
-      return processWin(player);
-    }
-
-    // they did not. continue the turn
-    turnHistory.addStep(player, drawnTile, discardTile, Constants.NOTHING);
-
-    // check whether any of the other players want this tile
-    var result = checkClaims(player, discardTile);
-  }
+    // async wait for the player's discard
+    player.discard(getDiscard);
+  };
 
   /**
    * finish a turn. this is called from the claim check

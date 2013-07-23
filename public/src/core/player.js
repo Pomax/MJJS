@@ -55,16 +55,57 @@ Player.prototype = {
     this.determineStrategy();
   },
   // discard a specific tile (action intiated by user) or pick one (tile==undef, automated discard)
-  discard: function(tile) {
-    var hand = this.hand;
-    if(tile) { hand.remove(tile); }
-    else { tile = hand.pickDiscard(this.computer); }
+  discard: function(sendDiscard) {
+    var player = this,
+        hand = this.hand;
 
-    if(tile === Constants.NOTILE || tile === Constants.WIN) {
-      return tile;
+    // autoplay
+    if(this.computer) {
+      tile = hand.pickDiscard(this.computer);
+      if(this.computer && (tile === Constants.NOTILE || tile === Constants.WIN)) {
+        return setTimeout(function() { sendDiscard(player, tile); }, 1);
+      }
+      this.determineStrategy();
+      return setTimeout(function() { sendDiscard(player, tile); }, 1);
     }
-    this.determineStrategy();
-    return tile;
+
+    // human player
+    var dialog = document.createElement("div");
+    document.getElementById("playerClaim").appendChild(dialog);
+
+    var reset = function() {
+      dialog.parentNode.removeChild(dialog);
+      hand.concealed.tiles.forEach(function(tile) {
+        tile.onclick = tile.oldclick;
+      });
+    };
+
+    hand.concealed.tiles.forEach(function(tile) {
+      tile.oldclick = tile.onclick;
+      tile.onclick = function() {
+        reset();
+        // send this tile as discard to the game loop
+        setTimeout(function() {
+          hand.concealed.remove(tile);
+          sendDiscard(player, tile);
+        }, 1);
+        return false;
+      };
+    });
+
+    // TODO: add kong-claim button
+
+    dialog.setAttribute("class", "discard dialog");
+    var button = document.createElement("button");
+    button.innerHTML = "Win";
+    button.onclick = function() {
+      reset();
+      setTimeout(function() {
+        hand.concealed.remove(tile);
+        sendDiscard(player, Constants.NOTHING);
+      }, 1);
+    };
+    dialog.appendChild(button);
   },
   // play a set of tiles, moving them from concealed to the open tile bank
   play: function(tile, setType, origin) { return this.hand.play(tile, setType, origin); },
@@ -75,12 +116,8 @@ Player.prototype = {
   // determine the play strategy
   determineStrategy: function(wall) { return this.hand.determineStrategy(wall); },
   // are we looking for this tile?
-  // FIXME: this currently represents what a player *has*, not what
-  //        they want the tile for. This is a pretty bad bug!
   lookingFor: function(tile) { return this.hand.lookingFor(tile); },
   // bid on a tile
-  // FIXME: the bid, right now, represents what a player *has*, not what
-  //        they want the tile for. This is a pretty bad bug!
   bid: function(tile, sendBid, bidInterval) {
     if(this.computer) {
       sendBid(this, this.lookingFor(tile));
@@ -92,13 +129,16 @@ Player.prototype = {
       //        tile for .." indicator.
       var dialog = document.createElement("div");
       dialog.setAttribute("class", "bid dialog");
-      [Constants.NOTHING, Constants.PAIR, Constants.CHOW, Constants.PUNG, Constants.KONG].forEach(function(s){
+      var options = [Constants.NOTHING, Constants.PAIR, Constants.CHOW, Constants.PUNG, Constants.KONG];
+      options.forEach(function(claim) {
         var button = document.createElement("button");
-        button.setAttribute("data-value", s);
-        button.innerHTML = Constants.setNames[s];
+        button.innerHTML = Constants.setNames[claim];
         button.onclick = function() {
           dialog.parentNode.removeChild(dialog);
-          sendBid(player, s);
+          sendBid(player, {
+            inhand: Tiles.getClaimReason(claim),
+            claimType: claim
+          });
         };
         dialog.appendChild(button);
       });
@@ -107,7 +147,10 @@ Player.prototype = {
         setTimeout(function() {
           if(dialog.parentNode) {
             dialog.parentNode.removeChild(dialog);
-            sendBid(player, Constants.NOTHING);
+            sendBid(player, {
+              inhand: Constants.NOTHING,
+              claimType: Constants.NOTHING
+            });
           }
         }, bidInterval);
       }

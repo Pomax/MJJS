@@ -28,7 +28,7 @@ function newHistory(el) {
                 ""
               );
     }
-  }
+  };
 
   var history = {
     steps: [],
