@@ -115,3 +115,7 @@ p { line-height: 1em; }
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#f6f6f6',GradientType=0 ); /* IE6-9 */
 
 }
+
+*[data-recommended] {
+  box-shadow: 0 0 2px 2px white;
+}

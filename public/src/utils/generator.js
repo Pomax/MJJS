@@ -82,7 +82,7 @@ var Generator = {
 
     // FIXME: remove anything that is in our "required" list from the discards.
     //        this should not be necessary, so it's an indication that the current
-    //        generator code is defficient.
+    //        generator code is deficient.
     partials.required.forEach(function(v) {
       var pos = discard.indexOf(v);
       while(pos !== -1) {
@@ -94,15 +94,15 @@ var Generator = {
     return {discard: discard, required: partials.required, role: partials.role};
   },
 
-  // This function takes ...
-  // FIXME: finish documentation here.
+  // This function determines whether certain tiles are
+  // required to fill certain sets based on in-hand tiles.
   fulfill: function(idx, permutable, tileTypes) {
     var required = [], role = [];
-        permutable = permutable.slice(0);
+        permutable = permutable.slice();
 
     var tileNumber = permutable.splice(idx, 1)[0],
         tileSuit = Tiles.getTileSuit(tileNumber);
-        tileTypes = tileTypes.slice(0);
+        tileTypes = tileTypes.slice();
     var tileType = tileTypes.splice(idx, 1)[0];
 
     var record = function(tileNumber, tileType) {

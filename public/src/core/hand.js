@@ -76,7 +76,8 @@ Hand.prototype = {
     if(discards.length>0) {
       // discard the lowest ranked tile.
       var tileNumber = discards.splice(0,1)[0];
-      return this.concealed.removeTileByNumber(tileNumber);
+      //return this.concealed.removeTileByNumber(tileNumber);
+      return this.concealed.getTileByNumber(tileNumber);;
     } else {
       console.log("difficult hand:");
       console.log(this.concealed.toTileNumbers(), this.open.toTileNumbers());
@@ -107,21 +108,18 @@ Hand.prototype = {
         if(pos !== -1) {
           tile = this.concealed.get(pos);
           console.log("gapped discard: "+tile);
-          this.concealed.remove(tile);
           return tile;
         }
         pos = values.indexOf(Constants.CONNECTED);
         if(pos !== -1) {
           tile = this.concealed.get(pos);
           console.log("connecting discard: "+tile);
-          this.concealed.remove(tile);
           return tile;
         }
         pos = values.indexOf(Constants.PAIR);
         if(pos !== -1) {
           tile = this.concealed.get(pos);
           console.log("pair discard O_O: "+tile);
-          this.concealed.remove(tile);
           return tile;
         }
         // !!danger zone!!
@@ -129,21 +127,21 @@ Hand.prototype = {
         if(pos !== -1) {
           tile = this.concealed.get(pos);
           console.log("danger zone - pung discard O_O: "+tile);
-          this.concealed.remove(tile);
           return tile;
         }
         pos = values.indexOf(Constants.PUNG);
         if(pos !== -1) {
           tile = this.concealed.get(pos);
           console.log("danger zone - pung discard O_O: "+tile);
-          this.concealed.remove(tile);
           return tile;
         }
         throw "DAH!";
       }
     }
 
-    return this.concealed.removeTileByNumber(this.concealed.get(0).tileNumber);
+    // last resort
+    console.log("No idea what to do - picking first tile in hand as discard...");
+    return this.concealed.get(0);
   },
   // are we looking for this tile?
   // FIXME: the bid, right now, represents what a player *has*, not what

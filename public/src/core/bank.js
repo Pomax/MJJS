@@ -45,6 +45,17 @@ Bank.prototype = {
     return ccount;
   },
   // get a tile by tile number
+  getTileByNumber: function(tileNumber) {
+    var tile, i=this.tiles.length;
+    while(i-->0) {
+      tile = this.tiles[i];
+      if(tile.tileNumber===tileNumber) {
+        return tile;
+      }
+    }
+    console.log("could not find "+tileNumber+" in "+this.toTileNumbers().join(","));
+    return false;
+  },
   removeTileByNumber: function(tileNumber) {
     var tile, i=this.tiles.length;
     while(i-->0) {
@@ -55,7 +66,7 @@ Bank.prototype = {
       }
     }
     console.log("could not find "+tileNumber+" in "+this.toTileNumbers().join(","));
-    return null;
+    return false;
   },
   // remove a tile from this bank
   remove: function(tile) {

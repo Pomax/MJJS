@@ -57,19 +57,22 @@ Player.prototype = {
   // discard a specific tile (action intiated by user) or pick one (tile==undef, automated discard)
   discard: function(sendDiscard) {
     var player = this,
-        hand = this.hand;
+        hand = this.hand,
+        tile = hand.pickDiscard(this.computer);
 
     // autoplay
     if(this.computer) {
-      tile = hand.pickDiscard(this.computer);
       if(this.computer && (tile === Constants.NOTILE || tile === Constants.WIN)) {
         return setTimeout(function() { sendDiscard(player, tile); }, 1);
       }
+      this.hand.remove(tile);
       this.determineStrategy();
       return setTimeout(function() { sendDiscard(player, tile); }, 1);
     }
 
     // human player
+    var recommended = tile;
+    recommended.setAttribute("data-recommended", true);
     var dialog = document.createElement("div");
     document.getElementById("playerClaim").appendChild(dialog);
 
@@ -86,7 +89,9 @@ Player.prototype = {
         reset();
         // send this tile as discard to the game loop
         setTimeout(function() {
-          hand.concealed.remove(tile);
+          hand.remove(tile);
+          recommended.removeAttribute("data-recommended");
+          player.determineStrategy();
           sendDiscard(player, tile);
         }, 1);
         return false;
@@ -101,7 +106,8 @@ Player.prototype = {
     button.onclick = function() {
       reset();
       setTimeout(function() {
-        hand.concealed.remove(tile);
+        hand.remove(tile);
+        recommended.removeAttribute("data-recommended");
         sendDiscard(player, Constants.NOTHING);
       }, 1);
     };

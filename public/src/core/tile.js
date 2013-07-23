@@ -159,13 +159,8 @@ var Tiles = {
     // definitely not a chow.
     return bestType;
   },
-  // FIXME: this function is broken - it does not take into account
-  //        that values can change when certain tiles are treated
-  //        as locked. This function should move tiles from
-  //        concealed to locked, instead, and re-evaluate the tile
-  //        values based on this more rigid hand.
-  //
-  //        Broken example: isWinningPattern([6,6,7,19,20,21,22,23,24,25,8], [2,2,8,8,8,8,8,8,8,8,8],{size:function() { return 1; }})
+  // Determine whether a combination of [tileNumber,...], [partOfPair,...] and {size: function() this.open.size(); }
+  // constitutes a winning hand or not. This is a fairly naive function.
   isWinningPattern: function(concealed, values, open) {
     var setCount = 4 - open.size();
     var pairCount = 1;
