@@ -72,7 +72,7 @@ Player.prototype = {
       // don't throw away a tile that can form a melded kong.
       if(this.hand.formsMeldedKong(tile)) {
         this.draw(this.wall, true);
-        return discard(sendDiscard);
+        return this.discard(sendDiscard);
       }
 
       else {
@@ -166,6 +166,33 @@ Player.prototype = {
         dialog.appendChild(button);
       });
       document.getElementById("playerClaim").appendChild(dialog);
+
+
+      // needs to be DRY'd out (ye olde "do not repeat yourself")
+      var winButton = document.createElement("button");
+      winButton.innerHTML = "win";
+      winButton.onclick = function() {
+        var winDialog = document.createElement("div");
+        winDialog.setAttribute("class", "bid win dialog");
+        winDialog.innerHTML = "<b>Win with</b>";
+        var options = [Constants.PAIR, Constants.CHOW, Constants.PUNG];
+        options.forEach(function(claim) {
+          var button = document.createElement("button");
+          button.innerHTML = Constants.setNames[claim];
+          button.onclick = function() {
+            winDialog.parentNode.removeChild(winDialog);
+            sendBid(player, {
+              inhand: Tiles.getClaimReason(claim),
+              claimType: Constants.WIN
+            });
+          };
+          winDialog.appendChild(button);
+        });
+        document.getElementById("playerClaim").replaceChild(winDialog, dialog);
+      };
+      dialog.appendChild(winButton);
+
+
       if(bidInterval) {
         setTimeout(function() {
           if(dialog.parentNode) {

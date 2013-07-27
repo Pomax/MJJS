@@ -6,7 +6,9 @@ window.location.query = function(key, defaultValue) {
   return match[0].replace(key+"=",'');
 };
 
-document.addEventListener("DOMContentLoaded", function() {
+var initialise = function() {
+  document.removeEventListener("DOMContentLoaded", initialise, false);
+
   // game variables
   var turnHistory,
       wall,
@@ -15,7 +17,6 @@ document.addEventListener("DOMContentLoaded", function() {
       tile,
       player,
       drawnTile,
-      interrupt = false,
       states = {
         SETUP: 0,
         STALE: 1,
@@ -31,8 +32,10 @@ document.addEventListener("DOMContentLoaded", function() {
       gameState = states.STALE,
       claims = {
         best: Constants.NOTHING
-      },
-      turnInterval = Constants.turnInterval = window.location.query("turnInterval", 1),
+      };
+
+  // these are effectively constants, but they can be overruled through the URL
+  var turnInterval = Constants.turnInterval = window.location.query("turnInterval", 1),
       bidInterval  = Constants.bidInterval  = window.location.query("bidInterval", false),
       openPlay     = Constants.openPlay     = window.location.query("openPlay", false),
       autoPlay     = Constants.autoPlay     = window.location.query("autoPlay", false);
@@ -63,6 +66,13 @@ document.addEventListener("DOMContentLoaded", function() {
    * Initial game setup
    */
   var setupGame = function(options) {
+    // yeah, we have loops...
+    var i;
+
+    // seriously. Do this:
+    console.clear();
+    document.getElementById("log").innerHTML = "";
+
     if(gameState === states.SETUP) {
       return;
     }
@@ -101,8 +111,6 @@ document.addEventListener("DOMContentLoaded", function() {
       players.push(player);
       document.getElementById("players").appendChild(player.asHTMLElement());
     });
-
-    var i;
 
     for(i=0; i < players.length; i++) {
       players[i].next = players[(i+1)%4];
@@ -159,11 +167,12 @@ document.addEventListener("DOMContentLoaded", function() {
    * Discard claim bid aggregator
    */
   var getBid = function(player, response) {
-    var bid = response.inhand;
-    if(bid > claims.best) {
+    var bid = response.inhand,
+        win = (response.claim === Constants.WIN);
+    if(win || bid > claims.best) {
       console.log(player.name + " wants this tile (bid: "+bid+", to form a "+Constants.setNames[Tiles.getClaimType(bid)]+").");
       console.log(player.name + " currently holds " + player.hand.concealed.toTileNumbers()+", requires " + player.hand.strategy.required);
-      claims.best = bid;
+      claims.best = (win ? Constants.WIN : bid);
       claims.bestBidder = player;
     }
     if(++claims.count === players.length-1) {
@@ -233,9 +242,9 @@ document.addEventListener("DOMContentLoaded", function() {
    * set up the game loop function
    */
   var playTurn = function(player) {
-    if(interrupt) {
+    if(Constants.interrupt) {
       gameState = states.INTERRUPTED;
-      interrupt = false;
+      Constants.interrupt = false;
       return;
     }
 
@@ -287,7 +296,7 @@ document.addEventListener("DOMContentLoaded", function() {
   };
 
   document.querySelector(".interrupt.button").onclick = function(){
-    interrupt = true;
+    Constants.interrupt = true;
   };
 
   document.querySelector(".log.button").onclick = function() {
@@ -298,4 +307,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // initial setup
   setupGame();
-}());
+};
+
+document.addEventListener("DOMContentLoaded", initialise, false);

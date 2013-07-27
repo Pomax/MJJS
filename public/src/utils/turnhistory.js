@@ -6,12 +6,13 @@ function newHistory(el) {
     this.open =  player.hand.open.toTileNumbers().join(",");
     this.bonus =  player.hand.bonus.toTileNumbers().join(",");
     this.drawn = drawn.tileNumber;
-    this.discard = (discarded.tileNumber ? discarded.tileNumber : discarded);
+    this.discard = (typeof discarded.tileNumber === "number" ? discarded.tileNumber : discarded);
     this.claimType = (claimType ? claimType : Constants.NOTHING);
   };
 
   Step.prototype.toString = function () {
     var claimType = this.claimType;
+
     return  this.playerName + " " +
             (claimType === Constants.NOTHING ?
               "drew" : "claimed"
@@ -49,6 +50,10 @@ function newHistory(el) {
     },
     getSteps: function() {
       return this.steps;
+    },
+    clear: function() {
+      this.steps = [];
+      this.initial = [];
     }
   };
 
