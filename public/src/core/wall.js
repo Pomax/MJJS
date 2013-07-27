@@ -4,6 +4,7 @@
 
 var Wall = function () {
   this.tiles = [];
+  this.discards = [];
 
   // create sorted array
   var tiles = [], i;
@@ -22,6 +23,7 @@ var Wall = function () {
 
 Wall.prototype = {
   tiles: [],
+  discards: [],
   deadCount: Constants.DEADWALL,
   // is this wall dead? (i.e. no more tiles available for drawing)
   isDead: function() { return this.tiles.size <= this.deadCount; },
@@ -29,19 +31,32 @@ Wall.prototype = {
   draw: function() {
     if (this.size() <= this.deadCount) { return Constants.NOTILE; }
     var tile = this.tiles.splice(0,1)[0];
-    if (this.el) { this.el.removeChild(this.el.children.item(0)); }
+    if (this.el) {
+      var wall = this.el.querySelector(".wall");
+      wall.removeChild(wall.children.item(0)); }
     return tile;
   },
   // draw a supplement tile, unless we've exhausted the wall
   drawSupplement: function() {
     return (this.size()>this.deadCount ? this.tiles.splice(this.tiles.length-1,1)[0] : Constants.NOTILE);
   },
+  // treat tile as discarded
+  addDiscard: function(tile) {
+    tile.reveal();
+    this.discards.push(tile);
+    if (this.el) { this.el.querySelector(".discards").appendChild(tile); }
+  },
   // this wall as an HTML element
   asHTMLElement: function() {
     if(!this.el) {
-      var div = document.createElement("div");
-      div.setAttribute("class", "wall");
-      (this.tiles).forEach(function(tile) { div.appendChild(tile); });
+      var div = document.createElement("div"),
+          wall = document.createElement("div"),
+          discard = document.createElement("div");
+      wall.setAttribute("class", "wall");
+      discard.setAttribute("class", "discards");
+      div.appendChild(wall);
+      div.appendChild(discard);
+      (this.tiles).forEach(function(tile) { wall.appendChild(tile); });
       this.el = div; }
     return this.el;
   },

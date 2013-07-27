@@ -8,7 +8,20 @@ p { line-height: 1em; }
 #wall {
   line-height: 10px;
 }
-#wall, #discards, #players {
+
+#wall .wall,
+#wall .discards {
+  display: inline-block;
+  width: 49%;
+  vertical-align: top;
+}
+#wall .wall + .discards {
+  margin-left: 0.5%;
+}
+
+#wall .wall,
+#wall .discards,
+#players {
   background: url(felt.png);
 }
 
@@ -117,5 +130,9 @@ p { line-height: 1em; }
 }
 
 *[data-recommended] {
+  box-shadow: 0 0 2px 2px rgb(156, 81, 81);
+}
+
+*[data-drawntile] {
   box-shadow: 0 0 2px 2px white;
 }

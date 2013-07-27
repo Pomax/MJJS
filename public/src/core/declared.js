@@ -13,6 +13,7 @@ Declared.prototype = {
   // add a tile to this hand
   add: function(set) {
     set.reveal();
+    set.clearMarks();
     this.sets.push(set);
     if(this.el) { this.el.appendChild(set.asHTMLElement()); }
   },
@@ -35,6 +36,15 @@ Declared.prototype = {
   },
   size: function() {
     return this.sets.length;
+  },
+  // try to meld a kong with this tile
+  formsMeldedKong: function(tile) {
+    var s, set;
+    for(s=0; s<this.sets.length; s++) {
+      set = this.sets[s];
+      if(set.meldKong(tile)) return true;
+    }
+    return false;
   },
   asHTMLElement: function(update) {
     var div;

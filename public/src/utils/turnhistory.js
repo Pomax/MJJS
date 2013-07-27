@@ -11,23 +11,22 @@ function newHistory(el) {
   };
 
   Step.prototype.toString = function () {
-    with(this) {
-      return  playerName + " " +
-              (claimType === Constants.NOTHING ?
-                "drew" : "claimed"
-              ) +
-              " " + Constants.tileNames[drawn] + " (" + drawn + ")"+
-              (claimType !== Constants.NOTHING ?
-                ", as " + Constants.setNames[claimType]
-                :
-                ""
-              ) +
-              (discard !== Constants.NOTHING?
-                ", discarded " + Constants.tileNames[discard] + " (" + discard + ")"
-                :
-                ""
-              );
-    }
+    var claimType = this.claimType;
+    return  this.playerName + " " +
+            (claimType === Constants.NOTHING ?
+              "drew" : "claimed"
+            ) +
+            " " + Constants.tileNames[this.drawn] + " (" + this.drawn + ")"+
+            (claimType !== Constants.NOTHING ?
+              ", as " + Constants.setNames[claimType]
+              :
+              ""
+            ) +
+            (discard !== Constants.NOTHING?
+              ", discarded " + Constants.tileNames[discard] + " (" + this.discard + ")"
+              :
+              ""
+            );
   };
 
   var history = {

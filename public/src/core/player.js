@@ -5,10 +5,12 @@
  * tile management during play.
  */
 
-var Player = function(name, computer) {
+var Player = function(name, computer, wall, players) {
   this.name = name;
   this.hand = new Hand();
   this.computer = !!computer;
+  this.wall = wall;
+  this.players = players;
 };
 
 Player.prototype = {
@@ -27,10 +29,12 @@ Player.prototype = {
     while(Tiles.isBonus(tile)) {
       this.hand.addBonus(tile);
       tile = (supplement ? wall.drawSupplement() : wall.draw());
+      if(!this.computer || Constants.openPlay) { tile.reveal(); }
       if(tile === Constants.NOTILE) return Constants.NOTILE;
     }
 
     this.hand.add(tile);
+    tile.markDrawnTile();
 
     // FIXME: if this tile draws us a kong, immediately play it
     //        This is not good play policy, but it helps prevent
@@ -65,14 +69,22 @@ Player.prototype = {
       if(this.computer && (tile === Constants.NOTILE || tile === Constants.WIN)) {
         return setTimeout(function() { sendDiscard(player, tile); }, 1);
       }
-      this.hand.remove(tile);
-      this.determineStrategy();
-      return setTimeout(function() { sendDiscard(player, tile); }, 1);
+      // don't throw away a tile that can form a melded kong.
+      if(this.hand.formsMeldedKong(tile)) {
+        this.draw(this.wall, true);
+        return discard(sendDiscard);
+      }
+
+      else {
+        this.hand.remove(tile);
+        this.determineStrategy();
+        return setTimeout(function() { sendDiscard(player, tile); }, 1);
+      }
     }
 
     // human player
     var recommended = tile;
-    recommended.setAttribute("data-recommended", true);
+    recommended.markRecommended();
     var dialog = document.createElement("div");
     document.getElementById("playerClaim").appendChild(dialog);
 
@@ -90,7 +102,6 @@ Player.prototype = {
         // send this tile as discard to the game loop
         setTimeout(function() {
           hand.remove(tile);
-          recommended.removeAttribute("data-recommended");
           player.determineStrategy();
           sendDiscard(player, tile);
         }, 1);
@@ -99,8 +110,8 @@ Player.prototype = {
     });
 
     // TODO: add kong-claim button
-
     dialog.setAttribute("class", "discard dialog");
+    dialog.innerHTML = "<b>Declare</b>";
     var button = document.createElement("button");
     button.innerHTML = "Win";
     button.onclick = function() {
@@ -113,6 +124,11 @@ Player.prototype = {
     };
     dialog.appendChild(button);
   },
+  // administration at the end of turn for this player
+  endOfTurn: function() {
+    this.unhighlight();
+    this.hand.clearMarks();
+  },
   // play a set of tiles, moving them from concealed to the open tile bank
   play: function(tile, setType, origin) { return this.hand.play(tile, setType, origin); },
   // reveal the player's hand
@@ -120,7 +136,7 @@ Player.prototype = {
   // sort the player's hand
   sort: function() { this.hand.sort(); },
   // determine the play strategy
-  determineStrategy: function(wall) { return this.hand.determineStrategy(wall); },
+  determineStrategy: function() { return this.hand.determineStrategy(this.wall, this.players); },
   // are we looking for this tile?
   lookingFor: function(tile) { return this.hand.lookingFor(tile); },
   // bid on a tile
@@ -135,6 +151,7 @@ Player.prototype = {
       //        tile for .." indicator.
       var dialog = document.createElement("div");
       dialog.setAttribute("class", "bid dialog");
+      dialog.innerHTML = "<b>Claim as</b>";
       var options = [Constants.NOTHING, Constants.PAIR, Constants.CHOW, Constants.PUNG, Constants.KONG];
       options.forEach(function(claim) {
         var button = document.createElement("button");

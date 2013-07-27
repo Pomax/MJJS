@@ -43,8 +43,14 @@ Run.prototype = {
   add: function(tile) {
     this.tiles.push(tile);
   },
+  meldKong: function(tile) {
+    return false;
+  },
   reveal: function() {
     this.tiles.forEach(function(t){ t.reveal(); });
+  },
+  clearMarks: function() {
+    this.tiles.forEach(function(t){ t.clearMarks(); });
   },
   // convert to array of tileNumbers
   toTileNumbers: function() {

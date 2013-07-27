@@ -1,5 +1,11 @@
 // treat a tile as an HTML image element
 var Tile = Image;
+Tile.prototype.markDrawnTile = function() { this.setAttribute("data-drawntile", true); };
+Tile.prototype.markRecommended = function() { this.setAttribute("data-recommended", true); };
+Tile.prototype.clearMarks = function() {
+  this.removeAttribute("data-drawntile");
+  this.removeAttribute("data-recommended");
+};
 
 /**
  * Mahjong "tile" implementation
@@ -161,11 +167,11 @@ var Tiles = {
   },
   // Determine whether a combination of [tileNumber,...], [partOfPair,...] and {size: function() this.open.size(); }
   // constitutes a winning hand or not. This is a fairly naive function.
-  isWinningPattern: function(concealed, values, open) {
+  isWinningPattern: function(values, open) {
     var setCount = 4 - open.size();
     var pairCount = 1;
     var i, v;
-    for(i=0; i<concealed.length; i++) {
+    for(i=0; i<values.length; i++) {
       v = values[i];
       if(v === Constants.CONNECTED || v === Constants.GAPPED) {
         return false;
@@ -189,5 +195,20 @@ var Tiles = {
       console.log("win result: "+setCount+"/"+pairCount+" (sum is "+(setCount+pairCount)+")");
     }
     return (setCount+pairCount === 0);
+  },
+  // value sort
+  valueFunction: function(a,b) {
+    // TODO: this doesn't take suit counts into account. It's much
+    //       better to discard dots 1 if you characters 1, 4 and 8
+    if(a >= Constants.HONOURS && b >= Constants.HONOURS) { return b-a; }
+    if(a >= Constants.HONOURS && b < Constants.HONOURS) { return 1; }
+    if(a < Constants.HONOURS && b >= Constants.HONOURS) { return -1; }
+    if(a < Constants.HONOURS && b < Constants.HONOURS) {
+      a = a % 9;
+      b = b % 9;
+      if((a===0 || a===8) && (b!==0 && b!== 8)) { return 1; }
+      if((b===0 || b===8) && (a!==0 && a!== 8)) { return -1; }
+    }
+    return 0;
   }
 };

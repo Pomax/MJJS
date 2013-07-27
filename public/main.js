@@ -1,8 +1,8 @@
-window.location.getQueryValue = function(key) {
+window.location.query = function(key, defaultValue) {
   var str = window.location.toString();
   var re = new RegExp(key + "=\\w+");
   var match = str.match(re);
-  if(!match) return "";
+  if(!match) return defaultValue;
   return match[0].replace(key+"=",'');
 };
 
@@ -32,10 +32,10 @@ document.addEventListener("DOMContentLoaded", function() {
       claims = {
         best: Constants.NOTHING
       },
-      turnInterval = window.location.getQueryValue("turnInterval") || 1,
-      bidInterval  = window.location.getQueryValue("bidInterval") || false,
-      openPlay     = window.location.getQueryValue("openPlay") || false,
-      autoPlay     = window.location.getQueryValue("autoPlay") || false;
+      turnInterval = Constants.turnInterval = window.location.query("turnInterval", 1),
+      bidInterval  = Constants.bidInterval  = window.location.query("bidInterval", false),
+      openPlay     = Constants.openPlay     = window.location.query("openPlay", false),
+      autoPlay     = Constants.autoPlay     = window.location.query("autoPlay", false);
 
   /**
    * someone has won the hand.
@@ -81,16 +81,15 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // clear "board"
     document.body.setAttribute("class",'');
-    document.getElementById("discards").innerHTML = "";
     document.getElementById("players").innerHTML = "";
     document.getElementById("wall").innerHTML = "";
     document.getElementById("wall").appendChild(wall.asHTMLElement());
 
     // match heights
     setTimeout(function() {
-      var wheight = document.getElementById("wall").clientHeight;
-      document.getElementById("wall").style.height = wheight + "px";
-      var discards = document.getElementById("discards");
+      var wheight = document.querySelector("#wall .wall").clientHeight;
+      document.querySelector("#wall .wall").style.height = wheight + "px";
+      var discards = document.querySelector("#wall .discards");
       discards.style.height = wheight + "px";
     }, 200);
 
@@ -98,7 +97,7 @@ document.addEventListener("DOMContentLoaded", function() {
      * setup the hands
      */
     options.players.forEach(function(p) {
-      var player = new Player(p.name, p.computer);
+      var player = new Player(p.name, p.computer, wall, players);
       players.push(player);
       document.getElementById("players").appendChild(player.asHTMLElement());
     });
@@ -111,10 +110,9 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     // draw tiles for each player
+    var drawTile = function(player) { player.draw(wall); };
     for(i=0; i < Constants.HANDSIZE - 1; i++) {
-      players.forEach(function(player) {
-        player.draw(wall);
-      });
+      players.forEach(drawTile);
     }
 
     // record our starting position
@@ -123,6 +121,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // show what each player has in their hand
     players.forEach(function(player) {
       player.sort();
+      player.endOfTurn();
       if(openPlay || player === players[0]) {
         player.reveal();
       }
@@ -177,7 +176,7 @@ document.addEventListener("DOMContentLoaded", function() {
    * any of the players, using a bidding system.
    */
   var checkClaims = function(player, discard) {
-    discard.reveal();
+    wall.addDiscard(discard);
     document.getElementById("discard").appendChild(discard);
     gameState = states.CHECKCLAIM;
     startClaimListening(player, discard);
@@ -199,12 +198,12 @@ document.addEventListener("DOMContentLoaded", function() {
     var chowCall =(bestBid===Constants.GAPPED || bestBid===Constants.CONNECTED),
         illegalChow = chowCall && (claims.bestBidder !== claims.discardingPlayer.next);
     if(bestBid===Constants.NOTHING || illegalChow) {
-      document.getElementById("discards").appendChild(drawnTile);
+      wall.addDiscard(drawnTile);
       nextTurn(claims.discardingPlayer);
       return;
     }
 
-    claims.discardingPlayer.unhighlight();
+    claims.discardingPlayer.endOfTurn();
     player = claims.bestBidder;
     player.highlight();
     document.getElementById("discard").innerHTML = "";
@@ -243,7 +242,7 @@ document.addEventListener("DOMContentLoaded", function() {
     gameState = states.TURN;
 
     player = player || players[0];
-    player.previous.unhighlight();
+    player.previous.endOfTurn();
     player.highlight();
     drawnTile = player.draw(wall);
 

@@ -8,16 +8,16 @@
 var Generator = {
 
   // generate the set of (reasonably) possible hands
-  generate: function(concealedTiles, declaredSets) {
+  generate: function(concealedTiles, players) {
     var copied = concealedTiles.slice(0);
     copied.sort(Constants.sortFunction);
-    return this.expand(copied, declaredSets);
+    return this.expand(copied, players);
   },
 
   // Generate all possible answers to the question "what do
   // we need to discard, and what do we need to pick up, to
   // get to a good hand?", using the provided information.
-  expand: function(permutable, locked) {
+  expand: function(permutable, players) {
     var discard = [];
 
     // First, we weed all tiles that do not already
@@ -66,18 +66,22 @@ var Generator = {
       partial.forEach(administrate);
     }
 
-    // TODO: rank discards, so that we throw away valuable tiles last
-    var match = 1;
+    var match = 1, bin;
+    discard = discard.sort(Tiles.valueFunction);
     while(tileTypes.length>0) {
       t = tileTypes.length;
+      bin = [];
       while(t-->0) {
         if(tileTypes[t]===match) {
-          discard.push(permutable[t]);
+          bin.push(permutable[t]);
           permutable.splice(t,1);
-          tileTypes.splice(t); }}
+          tileTypes.splice(t);
+        }
+      }
+      discard = discard.concat(bin.sort(Tiles.valueFunction));
+      match *= 2;
       // NOTE: we can do this ONLY because the Constants.js file
       //       declares the set types as powers of two!
-      match *= 2;
     }
 
     // FIXME: remove anything that is in our "required" list from the discards.

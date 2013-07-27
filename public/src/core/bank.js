@@ -83,6 +83,12 @@ Bank.prototype = {
   reveal: function() {
     (this.tiles).forEach(function(tile) { tile.reveal(); });
   },
+  // clear all tile markings
+  clearMarks: function() {
+    this.tiles.forEach(function(tile) {
+      tile.clearMarks();
+    });
+  },
   // sort this bank
   sort: function() {
     this.tiles.sort(function(a,b) {

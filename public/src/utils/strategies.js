@@ -14,10 +14,13 @@
 **/
 
 var Strategies = {
-  pick: function(wall, concealedTiles, declaredSets) {
+  pick: function(wall, concealedTiles, players) {
     concealedTiles = concealedTiles.toTileNumbers();
-    declaredSets = declaredSets.toTileNumbers();
-    var strategy = Generator.generate(concealedTiles, declaredSets); // {required, discard}
+    var strategy = Generator.generate(concealedTiles, players);
+        required = strategy.required,
+        role = strategy.role,
+        discard = strategy.discard;
+    strategy.likelihoods = Statistics.getLikelihoods(required, wall, concealedTiles, players);
     return strategy;
   }
 };

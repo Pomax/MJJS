@@ -38,8 +38,21 @@ Set.prototype = {
   add: function(tile) {
     this.tiles.push(tile);
   },
+  meldKong: function(tile) {
+    if(this.tiles.length!==3) return false;
+    var t = this.tiles,
+        m = tile.tileNumber;
+    if (t[0].tileNumber===m && t[1].tileNumber===m && t[2].tileNumber===m) {
+      this.tiles.push(tile);
+      return true;
+    }
+    return false;
+  },
   reveal: function() {
     this.tiles.forEach(function(t){ t.reveal(); });
+  },
+  clearMarks: function() {
+    this.tiles.forEach(function(t){ t.clearMarks(); });
   },
   // convert to array of tileNumbers
   toTileNumbers: function() {

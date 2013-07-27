@@ -14,6 +14,7 @@
 
 var Hand = function() {
   this.concealed = new Bank("concealed");
+  this.values = [];
   this.bonus = new Bank("bonus");
   this.open = new Declared();
   this.strategy = { discard: [], required: []};
@@ -62,42 +63,55 @@ Hand.prototype = {
     this.open.sort();
     this.bonus.sort();
   },
+  // try to meld a kong with this tile
+  formsMeldedKong: function(tile) {
+    if(this.open.formsMeldedKong(tile)) {
+      this.concealed.remove(tile);
+      return true;
+    }
+    return false;
+  },
   // does the hand contain a kong?
   hasKong: function(tile) {
     return this.concealed.getCount(tile) === 4;
   },
   // determine what we want to pay attention to during play
-  determineStrategy: function(wall) {
-    this.strategy = Strategies.pick(wall, this.concealed, this.open);
+  determineStrategy: function(wall, players) {
+    this.strategy = Strategies.pick(wall, this.concealed, players);
+  },
+  determineValues: function(concealed) {
+    // for each tile "t", get the value of "t", given {hand with "t" removed}
+    var values = this.values = [];
+    concealed.forEach(function(t) {
+      // form {hand with "t" removed}
+      var copied = concealed.slice();
+      copied.splice(copied.indexOf(t),1);
+      // compute "t" value
+      values.push(Tiles.getTileType(t, copied));
+    });
+    console.log("tile values: "+values);
+    return values;
   },
   // pick a tile to discard
   pickDiscard: function() {
     var discards = this.strategy.discard;
+
     if(discards.length>0) {
       // discard the lowest ranked tile.
       var tileNumber = discards.splice(0,1)[0];
-      //return this.concealed.removeTileByNumber(tileNumber);
-      return this.concealed.getTileByNumber(tileNumber);;
-    } else {
+      return this.concealed.getTileByNumber(tileNumber);
+    }
+
+    else {
       console.log("difficult hand:");
       console.log(this.concealed.toTileNumbers(), this.open.toTileNumbers());
 
-      // for each tile "t", get the value of "t", given {hand with "t" removed}
-      var values = [];
-      var concealed = this.concealed.toTileNumbers();
-      concealed.forEach(function(t) {
-        // form {hand with "t" removed}
-        var copied = concealed.slice();
-        copied.splice(copied.indexOf(t),1);
-        // compute "t" value
-        values.push(Tiles.getTileType(t, copied));
-      });
-      console.log("tile values: "+values);
+      var values = this.determineValues(this.concealed.toTileNumbers());
 
       // there are no "obvious" discards. This can be because we've
       // just won, or because we have a difficult hand in which all
       // tiles are already useful. Find out which it is.
-      if (Tiles.isWinningPattern(concealed, values, this.open)) {
+      if (Tiles.isWinningPattern(values, this.open)) {
         console.log("player holds a winning pattern");
         return Constants.WIN;
       }
@@ -143,19 +157,26 @@ Hand.prototype = {
     console.log("No idea what to do - picking first tile in hand as discard...");
     return this.concealed.get(0);
   },
+  // administration at the end of turn for this player
+  clearMarks: function() { this.concealed.clearMarks(); },
   // are we looking for this tile?
-  // FIXME: the bid, right now, represents what a player *has*, not what
-  //        they want the tile for. This is a pretty bad bug!
   lookingFor: function(tile) {
     var pos = this.strategy.required.indexOf(tile.tileNumber);
     if (pos===-1) return {
       inhand: Constants.NOTHING,
       claimType: Constants.NOTHING
     };
-    var role = this.strategy.role[pos];
+    var role = this.strategy.role[pos],
+        claimType = Tiles.getClaimType(role);
+    // But actually, will this tile let us win?
+    var hypotheticalHand = this.concealed.toTileNumbers().concat([tile.tileNumber]).sort(),
+        values = this.determineValues(hypotheticalHand);
+    if (Tiles.isWinningPattern(values, this.open)) {
+      claimType = Constants.WIN;
+    }
     return {
       inhand: role,
-      claimType: Tiles.getClaimType(role)
+      claimType: claimType
     };
   },
   // this hand as HTML element
