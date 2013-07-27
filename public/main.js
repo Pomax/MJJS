@@ -204,12 +204,14 @@ var initialise = function() {
         drawnTile = claims.tile;
 
     // no bids, or the best claim is a chow by someone who can't get that chow: normal discard.
-    var chowCall =(bestBid===Constants.GAPPED || bestBid===Constants.CONNECTED),
-        illegalChow = chowCall && (claims.bestBidder !== claims.discardingPlayer.next);
-    if(bestBid===Constants.NOTHING || illegalChow) {
-      wall.addDiscard(drawnTile);
-      nextTurn(claims.discardingPlayer);
-      return;
+    if(bestBid !== Constants.WIN) {
+      var chowCall =(bestBid===Constants.GAPPED || bestBid===Constants.CONNECTED),
+          illegalChow = chowCall && (claims.bestBidder !== claims.discardingPlayer.next);
+      if(bestBid===Constants.NOTHING || illegalChow) {
+        wall.addDiscard(drawnTile);
+        nextTurn(claims.discardingPlayer);
+        return;
+      }
     }
 
     claims.discardingPlayer.endOfTurn();

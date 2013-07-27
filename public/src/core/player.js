@@ -83,8 +83,6 @@ Player.prototype = {
     }
 
     // human player
-    var recommended = tile;
-    recommended.markRecommended();
     var dialog = document.createElement("div");
     document.getElementById("playerClaim").appendChild(dialog);
 
@@ -109,11 +107,24 @@ Player.prototype = {
       };
     });
 
-    // TODO: add kong-claim button
+    // TODO: clean this up
     dialog.setAttribute("class", "discard dialog");
     dialog.innerHTML = "<b>Declare</b>";
+
+    button = document.createElement("button");
+    button.innerHTML = "kong";
+    button.onclick = function() {
+      reset();
+      setTimeout(function() {
+        if(player.hand.hasKong(tile)) {
+          player.hand.play(tile, Constants.KONG, Constants.PUNG);
+        } else { player.hand.formMeldedKong(tile); }
+      }, 1);
+    };
+    dialog.appendChild(button);
+
     var button = document.createElement("button");
-    button.innerHTML = "Win";
+    button.innerHTML = "win";
     button.onclick = function() {
       reset();
       setTimeout(function() {
@@ -123,6 +134,10 @@ Player.prototype = {
       }, 1);
     };
     dialog.appendChild(button);
+
+    if(tile === Constants.WIN) {
+      button.setAttribute("class","recommend winning");
+    } else { tile.markRecommended(); }
   },
   // administration at the end of turn for this player
   endOfTurn: function() {
@@ -167,15 +182,14 @@ Player.prototype = {
       });
       document.getElementById("playerClaim").appendChild(dialog);
 
-
-      // needs to be DRY'd out (ye olde "do not repeat yourself")
+      // needs to be DRY'd out (ye olde "don't repeat yourself")
       var winButton = document.createElement("button");
       winButton.innerHTML = "win";
       winButton.onclick = function() {
         var winDialog = document.createElement("div");
         winDialog.setAttribute("class", "bid win dialog");
         winDialog.innerHTML = "<b>Win with</b>";
-        var options = [Constants.PAIR, Constants.CHOW, Constants.PUNG];
+        var options = [Constants.NOTHING, Constants.PAIR, Constants.CHOW, Constants.PUNG];
         options.forEach(function(claim) {
           var button = document.createElement("button");
           button.innerHTML = Constants.setNames[claim];
@@ -192,7 +206,7 @@ Player.prototype = {
       };
       dialog.appendChild(winButton);
 
-
+      // should we time out?
       if(bidInterval) {
         setTimeout(function() {
           if(dialog.parentNode) {
@@ -204,6 +218,7 @@ Player.prototype = {
           }
         }, bidInterval);
       }
+
     }
   },
   // highlight player as "current player" (HTML)
