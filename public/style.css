@@ -137,6 +137,10 @@ p { line-height: 1em; }
   box-shadow: 0 0 2px 2px white;
 }
 
+*[data-recommended][data-drawntile] {
+  box-shadow: 0 0 2px 2px rgb(134, 131, 131)!important;
+}
+
 button.recommend.winning {
   box-shadow: 0 0 15px 3px greenyellow;
 }

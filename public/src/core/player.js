@@ -129,7 +129,6 @@ Player.prototype = {
       reset();
       setTimeout(function() {
         hand.remove(tile);
-        recommended.removeAttribute("data-recommended");
         sendDiscard(player, Constants.NOTHING);
       }, 1);
     };

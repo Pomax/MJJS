@@ -19,6 +19,10 @@ var Wall = function () {
     tileNumber = tiles.splice((Math.random()*tiles.length), 1)[0];
     this.tiles.push(Tiles.create(tileNumber, true));
   }
+
+  for(var t=0, len=this.tiles.length; t<this.deadCount; t++) {
+    this.tiles[len-(1+t)].src = "tiles/dead.jpg";
+  }
 };
 
 Wall.prototype = {
@@ -42,6 +46,7 @@ Wall.prototype = {
   },
   // treat tile as discarded
   addDiscard: function(tile) {
+    tile.clearMarks();
     tile.reveal();
     this.discards.push(tile);
     if (this.el) { this.el.querySelector(".discards").appendChild(tile); }
