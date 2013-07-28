@@ -160,12 +160,13 @@ Hand.prototype = {
   // administration at the end of turn for this player
   clearMarks: function() { this.concealed.clearMarks(); },
   // are we looking for this tile?
-  lookingFor: function(tile) {
-    var pos = this.strategy.required.indexOf(tile.tileNumber);
-    if (pos===-1) return {
+  lookingFor: function(tile, mayChow) {
+    var nothing = {
       inhand: Constants.NOTHING,
       claimType: Constants.NOTHING
     };
+    var pos = this.strategy.required.indexOf(tile.tileNumber);
+    if (pos===-1) return nothing;
     var role = this.strategy.role[pos],
         claimType = Tiles.getClaimType(role);
     // But actually, will this tile let us win?
@@ -173,6 +174,10 @@ Hand.prototype = {
         values = this.determineValues(hypotheticalHand);
     if (Tiles.isWinningPattern(values, this.open)) {
       claimType = Constants.WIN;
+    }
+    // if we can't win, and we want to chow, can we?
+    else if(claimType === Constants.CHOW && !mayChow) {
+      return nothing;
     }
     return {
       inhand: role,

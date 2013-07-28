@@ -134,9 +134,11 @@ Player.prototype = {
     };
     dialog.appendChild(button);
 
-    if(tile === Constants.WIN) {
-      button.setAttribute("class","recommend winning");
-    } else { tile.markRecommended(); }
+    if(Constants.playHints) {
+      if(tile === Constants.WIN) {
+        button.setAttribute("class","recommend winning");
+      } else { tile.markRecommended(); }
+    }
   },
   // administration at the end of turn for this player
   endOfTurn: function() {
@@ -152,24 +154,34 @@ Player.prototype = {
   // determine the play strategy
   determineStrategy: function() { return this.hand.determineStrategy(this.wall, this.players); },
   // are we looking for this tile?
-  lookingFor: function(tile) { return this.hand.lookingFor(tile); },
+  lookingFor: function(tile, mayChow) {
+    // FIXME: the code path that gets this bid actually treats
+    //        the bid as a "I have this" rather than "I need the
+    //        tile for .." indicator.
+    return this.hand.lookingFor(tile, mayChow);
+  },
   // bid on a tile
-  bid: function(tile, sendBid, bidInterval) {
+  bid: function(from, tile, sendBid, bidInterval) {
+    var player = this,
+        recommended = this.lookingFor(tile, from.next===player);
+
     if(this.computer) {
-      sendBid(this, this.lookingFor(tile));
+      sendBid(this, recommended);
     } else {
-      var player = this;
-      // generate a dialog for the user to click through
-      // FIXME: the code path that gets this bid actually treats
-      //        the bid as a "I have this" rather than "I need the
-      //        tile for .." indicator.
-      var dialog = document.createElement("div");
+      var recommendedBid = recommended.inhand,
+          recommendedClaim = recommended.claimType,
+          dialog = document.createElement("div");
+
       dialog.setAttribute("class", "bid dialog");
       dialog.innerHTML = "<b>Claim as</b>";
       var options = [Constants.NOTHING, Constants.PAIR, Constants.CHOW, Constants.PUNG, Constants.KONG];
       options.forEach(function(claim) {
         var button = document.createElement("button");
         button.innerHTML = Constants.setNames[claim];
+        // show the recommended cours of action.
+        if(Constants.playHints && claim===recommendedClaim) {
+          button.setAttribute("data-recommended", true);
+        }
         button.onclick = function() {
           dialog.parentNode.removeChild(dialog);
           sendBid(player, {

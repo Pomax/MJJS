@@ -38,7 +38,8 @@ var initialise = function() {
   var turnInterval = Constants.turnInterval = window.location.query("turnInterval", 1),
       bidInterval  = Constants.bidInterval  = window.location.query("bidInterval", false),
       openPlay     = Constants.openPlay     = window.location.query("openPlay", false),
-      autoPlay     = Constants.autoPlay     = window.location.query("autoPlay", false);
+      autoPlay     = Constants.autoPlay     = window.location.query("autoPlay", false),
+      playHints    = Constants.playHints    = window.location.query("playHints", false);
 
   /**
    * someone has won the hand.
@@ -91,8 +92,9 @@ var initialise = function() {
 
     // clear "board"
     document.body.setAttribute("class",'');
-    document.getElementById("players").innerHTML = "";
-    document.getElementById("wall").innerHTML = "";
+    ["playerClaim", "players", "wall"].forEach(function(id) {
+      document.getElementById(id).innerHTML = "";
+    });
     document.getElementById("wall").appendChild(wall.asHTMLElement());
 
     // match heights
@@ -191,7 +193,7 @@ var initialise = function() {
     startClaimListening(player, discard);
     players.forEach(function(otherplayer){
       if(otherplayer===player) return;
-      otherplayer.bid(discard, getBid, bidInterval);
+      otherplayer.bid(player, discard, getBid, bidInterval);
     });
   };
 
@@ -288,7 +290,9 @@ var initialise = function() {
   };
 
   // button bindings
-  document.querySelector(".reset.button").onclick = setupGame;
+  document.querySelector(".reset.button").onclick = function() {
+    setupGame();
+  };
 
   document.querySelector(".play.button").onclick = function() {
     if(gameState!==states.INTERRUPTED) {
